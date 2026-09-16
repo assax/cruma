@@ -29,6 +29,11 @@ v `CHANGES.md`, rozcestník v `README.md`.
   a tokeny, na konci čas konce, délku, výsledek (commity, verze, testy) a co se nestihlo.
 - Sprint při stavbě I-1 obvykle odpovídá jedné etapě z `docs/arch/i-1/tasks.md`; v záznamu uveď rozsah jako
   úkoly `T-n`.
+- **Ověřuje se lokálně.** Etapa je splněná a další smí začít, když lokálně projde `dotnet build Cruma.slnx`
+  a `dotnet test Cruma.slnx` (včetně testů proti PostgreSQL v kontejneru). Výstupy etap v `tasks.md` / `plan.md`
+  zmiňující CI se ověří až při pushi na pokyn autora; chyba z CI se pak opraví jako první úkol. Na CI se
+  nečeká a kvůli němu se nepushuje (rozhodnutí autora 2026-09-16).
+- Při zelených lokálních testech se commituje a pokračuje bez čekání na autora.
 - Časy zjišťuj příkazem (`Get-Date -Format 'yyyy-MM-dd HH:mm'`), nehádej je.
 - Drobné úkoly mimo sprint se do `dev/` nezapisují.
 

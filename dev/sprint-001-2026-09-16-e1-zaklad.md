@@ -5,7 +5,7 @@
 | **Začátek** | 2026-09-16 22:16 |
 | **Konec** | 2026-09-16 22:32 |
 | **Délka** | 16 min (čistá, bez pauz: 16 min) |
-| **Stav** | hotovo lokálně · CI čeká na push (autor) |
+| **Stav** | hotovo (ověřeno lokálně; CI se ověří při pushi) |
 | **Verze** | – (nevydáno) |
 | **Rozsah** | tasks.md T-2..T-7 (etapa E-1) · před sprintem CHANGES 1 (PER-006, commit `4ba9411`) |
 | **Tokeny** | ~74 000 (součet úseků, odhad; bez CHANGES 1) |
@@ -79,8 +79,8 @@
 
 ## Nestihlo se / otevřené
 
-- **Běh v CI neověřen** – workflow vyžaduje push na GitHub, a ten je jen na pokyn autora. Výstup etapy E-1
-  („prochází lokálně i v CI“) je splněný jen lokálně. Po pushi zkontrolovat běh `build` na GitHubu.
+- **Běh v CI neověřen** – workflow vyžaduje push, ten je jen na pokyn autora. Autor 2026-09-16 rozhodl, že etapa
+  se ověřuje lokálně a CI se zkontroluje při pushi (pravidlo v `AGENTS.md`, sekce Sprinty).
 - Compose v Dockeru ověří až CI (lokálně Docker není); v Podmanu ověřeno.
 
 ## Poznámky
