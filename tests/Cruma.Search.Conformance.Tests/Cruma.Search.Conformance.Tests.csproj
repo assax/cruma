@@ -7,4 +7,9 @@
     <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Image PostgreSQL se čte z deploy/compose.yaml stejně jako v Cruma.Server.Tests. -->
+    <Compile Include="..\Cruma.Server.Tests\Infrastructure\PostgreSqlImage.cs" Link="Infrastructure\PostgreSqlImage.cs" />
+  </ItemGroup>
+
 </Project>

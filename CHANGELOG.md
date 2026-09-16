@@ -31,3 +31,10 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
   a extrakcí textu; doména poznámek, kategorií a štítků; verze poznámek, tříbodový merge po blocích a vlastností
   s konflikty a jejich vyřešením; normalizace a tokenizace pro vyhledávání; kontrakty synchronizačního
   protokolu – jádro, na kterém stojí server, desktop i web, ověřené 132 unit testy včetně scénářů slučování.
+- **Server I-1 (etapa E-3).** ASP.NET Core nad PostgreSQL: jednotná zápisová cesta poznámek s tříbodovým merge,
+  verzemi a spojováním uložení, kategorie a štítky, vyhledávání bez ohledu na diakritiku, REST API v1,
+  synchronizační protokol pro desktop (handshake, push s deduplikací, pull podle kurzoru), audit bez obsahu
+  a append-only, cookie session a vývojové přihlášení – aby web i desktop měly proti čemu běžet. Přihlášení
+  Googlem se zapne po zadání OAuth údajů.
+- **Izolace uživatelů a konformní sada vyhledávání.** Každý endpoint i synchronizace ověřeně nevydá data jiného
+  uživatele; vyhledávání nad PostgreSQL vrací stejné výsledky jako referenční vyhodnocení.

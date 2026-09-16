@@ -76,7 +76,11 @@ Kostra řešení existuje (etapa E-1). Platí:
 - Nová funkce = nový test. Scénáře slučování, konformní testy vyhledávání a testy izolace uživatelů jsou
   povinné (`shared/testing-strategy.md`).
 - Vývojová databáze: `deploy/.env` podle `deploy/.env.example` (necommituje se), pak
-  `podman compose -f deploy/compose.yaml --profile dev up -d`. Testcontainers nad Podman machine fungují bez
+  `podman compose -f deploy/compose.yaml --profile dev up -d`. Server pro vývoj: připojení v user-secrets
+  `Cruma:Database:ConnectionString`, migrace `dotnet ef database update --project src/Cruma.Server` (lokální
+  nástroj, `dotnet tool restore`), běh `dotnet run --project src/Cruma.Server` na https://localhost:5001.
+  Bez Googlu přihlášení `POST /auth/dev/sign-in {"subject":"…"}` (jen Development). Migrace nová =
+  `dotnet ef migrations add <Název> --project src/Cruma.Server --output-dir Infrastructure/Migrations`. Testcontainers nad Podman machine fungují bez
   nastavení; kdyby Docker API nenašly, nastavit `DOCKER_HOST=npipe://./pipe/podman-machine-default`.
 - Architektonický test (`tests/Cruma.Architecture.Tests`) čte reference přímo z `solution-structure-template.md`
   §3 – nepovolenou referenci neobcházej, oprav návrh. Nový projekt = řádek v šabloně ve stejné změně (STR-001).

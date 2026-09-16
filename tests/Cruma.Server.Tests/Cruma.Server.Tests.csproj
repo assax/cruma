@@ -2,8 +2,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cruma.Server\Cruma.Server.csproj" />
-    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Npgsql" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 
 </Project>

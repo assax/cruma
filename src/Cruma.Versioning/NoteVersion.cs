@@ -52,6 +52,20 @@ public sealed record NoteVersion
     public static NoteVersion First(Note metadata, ContentDocument document, VersionSource source, DateTimeOffset createdAtUtc) =>
         new(1, null, createdAtUtc, source, document, metadata, []);
 
+    /// <summary>Obnoví uloženou verzi z úložiště; čísla a základ se přebírají tak, jak byly přiděleny.</summary>
+    public static NoteVersion FromStored(
+        long number,
+        long? baseNumber,
+        DateTimeOffset createdAtUtc,
+        VersionSource source,
+        ContentDocument document,
+        Note metadata,
+        IEnumerable<OverwrittenValue> overwrittenValues)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
+        return new NoteVersion(number, baseNumber, createdAtUtc, source, document, metadata, [.. overwrittenValues]);
+    }
+
     /// <summary>Další verze poznámky. Předchozí verze zůstává beze změny (VER-007).</summary>
     public NoteVersion Next(
         ContentDocument document,

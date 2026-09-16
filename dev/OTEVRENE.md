@@ -8,6 +8,9 @@ přesune do *Vyřešeno* s rozhodnutím a datem.
 
 | # | Zapsáno | Sprint / úkol | Bod | Proč nejisté | Varianty a doporučení |
 |---|---|---|---|---|---|
+| 1 | 2026-09-16 | 003 / T-22, výstup E-3 | Přihlášení Googlem na webu neověřeno | Chybí OAuth klient (T-19, autor). Kód je zapojený podmíněně: `/auth/sign-in/google` → `/auth/callback` → založení uživatele a cookie session. | Po T-19 (user-secrets `Cruma:Identity:Google:ClientId`/`ClientSecret`, redirect `https://localhost:5001/signin-google`) spustit server a přihlásit se v prohlížeči; agent pak doplní případné opravy. |
+| 2 | 2026-09-16 | 003 / T-20, T-22 | Přihlášení desktopu tokenem (authorization code + PKCE přes systémový prohlížeč, SEC-002) | Prototyp T-20 musí ověřit člověk přihlášením Googlem; profil doporučuje OpenIddict. Synchronizační endpointy zatím přijímají cookie session – pro desktop nepoužitelné. | Po T-19: OpenIddict na serveru (authorization + token endpoint, PKCE, refresh token), desktop s loopback redirectem; bearer schéma pro `/api/sync/v1`. Doporučuji udělat jako první úkol dalšího sprintu. |
+| 3 | 2026-09-16 | 003 / security-policy §4, FR-35 akc. 1 | Omezení četnosti (rate limiting) na autentizačních endpointech a audit `security.rate_limited`, `security.authorization_denied` | Žádný úkol I-1 to nejmenuje, ale FR-35 akc. 1 tyto události vyjmenovává. Nejasné, zda patří do I-1. | ASP.NET Core rate limiter na `/auth/*` s auditem odmítnutí; `authorization_denied` při 403. Doporučuji zařadit do E-6 (nasazení) jako součást hardeningu. |
 
 ## Vyřešeno
 

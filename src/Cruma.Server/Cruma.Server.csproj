@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <!-- Tajné údaje pro vývoj (Google OAuth) mimo repozitář: dotnet user-secrets (SEC-006). -->
+    <UserSecretsId>cruma-server-6f1d2c9e-4b7a-4e0f-9a51-3c8d2b7e1f40</UserSecretsId>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Cruma.Notes\Cruma.Notes.csproj" />
     <ProjectReference Include="..\Cruma.Kanban\Cruma.Kanban.csproj" />
@@ -10,12 +15,18 @@
     <ProjectReference Include="..\Cruma.Blobs\Cruma.Blobs.csproj" />
     <ProjectReference Include="..\Cruma.Api.Contracts\Cruma.Api.Contracts.csproj" />
     <ProjectReference Include="..\Cruma.Web\Cruma.Web.csproj" />
+    <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Include="NLog.Web.AspNetCore" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="nlog.config" CopyToOutputDirectory="PreserveNewest" />
+    <InternalsVisibleTo Include="Cruma.Server.Tests" />
+    <InternalsVisibleTo Include="Cruma.Search.Conformance.Tests" />
   </ItemGroup>
 
 </Project>
