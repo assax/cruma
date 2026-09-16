@@ -4,4 +4,8 @@
     <ProjectReference Include="..\..\src\Cruma.Content\Cruma.Content.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

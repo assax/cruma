@@ -27,3 +27,7 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
   do konzole, web do konzole prohlížeče.
 - **CI build na GitHub Actions.** Při každém push a pull requestu build, všechny testy a kontrola compose
   v Dockeru na Linux runneru.
+- **Sdílená logika I-1 (etapa E-2).** Schéma dokumentu s identifikátory bloků, registrem typů, migracemi
+  a extrakcí textu; doména poznámek, kategorií a štítků; verze poznámek, tříbodový merge po blocích a vlastností
+  s konflikty a jejich vyřešením; normalizace a tokenizace pro vyhledávání; kontrakty synchronizačního
+  protokolu – jádro, na kterém stojí server, desktop i web, ověřené 132 unit testy včetně scénářů slučování.

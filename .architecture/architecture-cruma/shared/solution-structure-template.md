@@ -143,6 +143,7 @@ Any reference not listed is forbidden (STR-001, DEP-001..DEP-004).
 | `Cruma.Content.Tests` | schema, migrations, export round-trip | unit |
 | `Cruma.Versioning.Tests` | merge scenarios, metadata merge, comparison | unit |
 | `Cruma.Search.Tests` | normalizer, tokenizer, query | unit |
+| `Cruma.Sync.Tests` | protocol contracts serialization, client version compatibility | unit |
 | `Cruma.Notes.Tests`, `Cruma.Kanban.Tests` | domain rules | unit |
 | `Cruma.Search.Conformance.Tests` | shared suite over SQLite and PostgreSQL adapters (TST-002) | integration |
 | `Cruma.Server.Tests` | endpoints, modules, user isolation, sync over real PostgreSQL (TST-003, TST-004) | integration |

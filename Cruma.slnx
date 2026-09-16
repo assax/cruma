@@ -27,6 +27,7 @@
     <Project Path="tests/Cruma.Search.Tests/Cruma.Search.Tests.csproj" />
     <Project Path="tests/Cruma.Server.Tests/Cruma.Server.Tests.csproj" />
     <Project Path="tests/Cruma.Sync.Client.Tests/Cruma.Sync.Client.Tests.csproj" />
+    <Project Path="tests/Cruma.Sync.Tests/Cruma.Sync.Tests.csproj" />
     <Project Path="tests/Cruma.Ui.Tests/Cruma.Ui.Tests.csproj" />
     <Project Path="tests/Cruma.Versioning.Tests/Cruma.Versioning.Tests.csproj" />
   </Folder>

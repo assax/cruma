@@ -1,0 +1,55 @@
+{
+  "type": "doc",
+  "schemaVersion": 1,
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "id": "b-heading", "level": 2 },
+      "content": [ { "type": "text", "text": "Certifikát serveru" } ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": { "id": "b-marks" },
+      "content": [
+        { "type": "text", "marks": [ { "type": "bold" } ], "text": "tučně" },
+        { "type": "text", "text": " " },
+        { "type": "text", "marks": [ { "type": "italic" }, { "type": "underline" } ], "text": "kurzíva podtržená" },
+        { "type": "hardBreak" },
+        { "type": "text", "marks": [ { "type": "strike" } ], "text": "přeškrtnuto" },
+        { "type": "text", "text": " " },
+        { "type": "text", "marks": [ { "type": "highlight" } ], "text": "zvýrazněno" },
+        { "type": "text", "text": " " },
+        { "type": "text", "marks": [ { "type": "link", "attrs": { "href": "https://example.org" } } ], "text": "odkaz" }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "attrs": { "id": "b-bullets" },
+      "content": [
+        { "type": "listItem", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "první" } ] } ] },
+        { "type": "listItem", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "druhá" } ] } ] }
+      ]
+    },
+    {
+      "type": "orderedList",
+      "attrs": { "id": "b-ordered", "start": 1 },
+      "content": [
+        { "type": "listItem", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "krok" } ] } ] }
+      ]
+    },
+    {
+      "type": "taskList",
+      "attrs": { "id": "b-tasks" },
+      "content": [
+        { "type": "taskItem", "attrs": { "checked": true }, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "hotovo" } ] } ] },
+        { "type": "taskItem", "attrs": { "checked": false }, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "zbývá" } ] } ] }
+      ]
+    },
+    {
+      "type": "futureWidget",
+      "attrs": { "id": "b-unknown", "payload": { "nested": [ 1, 2, 3 ] } },
+      "content": [ { "type": "text", "text": "z novější verze" } ]
+    }
+  ],
+  "futureRootProperty": "zachovat"
+}
