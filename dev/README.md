@@ -11,6 +11,7 @@ nezapisují. Princip je převzatý ze Symbolonu (`md-split-editor/dev`) přes Su
 |---|---|
 | `README.md` | tahle pravidla a šablona |
 | `SPRINTY.md` | přehled všech sprintů – jeden řádek na sprint |
+| `OTEVRENE.md` | otevřené body k rozhodnutí autora – rozpory a přeskočené části |
 | `sprint-NNN-YYYY-MM-DD-kratky-nazev.md` | záznam jednoho sprintu (`NNN` = pořadí od `001`) |
 
 ## Pravidla

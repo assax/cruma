@@ -14,10 +14,16 @@ v `CHANGES.md`, rozcestník v `README.md`.
 - **Architektura systému:** `docs/arch/plan.md` a rozhodnutí `docs/arch/DECISIONS.md` (D-1..D-9).
 - **Co se právě staví:** inkrement I-1, `docs/arch/i-1/tasks.md` (úkoly T-n v etapách E-1..E-6) spolu
   s `docs/arch/i-1/spec.md` a `docs/arch/i-1/plan.md`. Implementuje se odsud.
-- Při rozporu: profil > `spec.md` > `plan.md` > `tasks.md`. Rozpor neřeš sám – zastav a zeptej se.
+- Při rozporu: profil > `spec.md` > `plan.md` > `tasks.md`.
+- **Rozpor, nejasnost nebo `Scope hint: unresolved` agent nezastavuje.** Zkusí je vyřešit tak, aby řešení
+  zapadalo do celkové architektury a přístupu profilu. Je-li si řešením prakticky jistý (~99 %), použije ho
+  a zapíše do záznamu sprintu (*Rozhodnutí během sprintu*). Jinak bod zapíše do `dev/OTEVRENE.md`
+  (co, proč nejisté, varianty, doporučení), dotčenou část přeskočí a pokračuje vším, co jde udělat.
+  Projekt je osobní, nic není v produkci – cokoli jde později opravit (rozhodnutí autora 2026-09-16).
 - Varianty označené `REJECTED` v `plan.md` a `DECISIONS.md` se nikdy neimplementují.
-- Úkol se `Scope hint: unresolved` → zastav a zeptej se, místo si nevybírej.
-- Úkoly s `Owner: operator` dělá autor; agent na ně čeká a neobchází je.
+- Úkoly s `Owner: operator` dělá autor. Agent kvůli nim nečeká: udělá vše, co na nich přímo nezávisí,
+  i když etapa formálně začíná až po nich (např. server bez Google přihlášení s testovací autentizací),
+  a závislé části zapíše do `dev/OTEVRENE.md`.
 - Dokumenty v `docs/arch/` jsou uzavřené výstupy architektonických běhů. Neupravují se při implementaci;
   změna architektury jde přes nový běh architektonického enginu.
 
