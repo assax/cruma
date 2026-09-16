@@ -4,6 +4,8 @@ using Cruma.Server.Infrastructure;
 using Cruma.Server.Notes;
 using Cruma.Server.Search;
 using Cruma.Server.Sync;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,9 +22,37 @@ builder.Services
     .AddSearchModule()
     .AddSyncModule(builder.Configuration);
 
+// Za reverzní proxy (produkce) server věří hlavičkám X-Forwarded-* – jen když je to v konfiguraci zapnuté,
+// protože server je pak dostupný výhradně přes proxy v síti kontejnerů (SEC-008).
+var behindProxy = builder.Configuration.GetValue<bool>("Cruma:BehindProxy");
+if (behindProxy)
+{
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+}
+
 var app = builder.Build();
 
-// Migrace databáze se při startu neaplikují – jsou samostatným krokem nasazení (PER-003, OPS-005).
+// Migrace databáze se při startu neaplikují – jsou samostatným krokem nasazení (PER-003, OPS-005):
+// `Cruma.Server migrate` je aplikuje a skončí.
+if (args.Contains("migrate", StringComparer.Ordinal))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var database = scope.ServiceProvider.GetRequiredService<CrumaDbContext>().Database;
+    var pending = (await database.GetPendingMigrationsAsync()).ToList();
+    await database.MigrateAsync();
+    app.Logger.LogInformation("Database migrations applied: {Migrations}", pending.Count == 0 ? "none" : string.Join(", ", pending));
+    return;
+}
+
+if (behindProxy)
+{
+    app.UseForwardedHeaders();
+}
 
 app.UseRequestContext();
 app.UseExceptionHandler();

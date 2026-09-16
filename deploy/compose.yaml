@@ -1,16 +1,19 @@
 # Cruma – definice kontejnerů (deployment-pattern.md §2).
 # Musí běžet beze změn v Podmanu i Dockeru (OPS-001): žádné funkce specifické pro jeden nástroj.
+# Tajné údaje se čtou z deploy/.env (vzor deploy/.env.example; .env se necommituje – SEC-006).
 #
 # Vývoj (jen PostgreSQL):
 #   podman compose -f deploy/compose.yaml --profile dev up -d
-#   docker compose -f deploy/compose.yaml --profile dev up -d
-# Heslo se čte z deploy/.env (vzor deploy/.env.example; .env se necommituje – SEC-006).
 #
-# Produkční služby (proxy, server, migrate, db, backup) přibudou v etapě E-6.
+# Produkce (proxy, server, db, backup); migrace a jednorázová záloha jsou samostatné kroky nasazení:
+#   deploy/deploy.sh <verze>          – jediný podporovaný způsob nasazení (deployment-pattern.md §3)
+# Produkční proměnné nemají v compose povinnost (compose interpoluje celý soubor i pro profil dev);
+# jejich přítomnost kontroluje deploy.sh.
 
 name: cruma
 
 services:
+  # --- Vývoj -----------------------------------------------------------------------------------------
   db-dev:
     # Pevná verze image (OPS-004); stejnou verzi používají testy přes Testcontainers.
     image: docker.io/library/postgres:18.6-alpine
@@ -18,7 +21,8 @@ services:
     environment:
       POSTGRES_DB: cruma
       POSTGRES_USER: cruma
-      POSTGRES_PASSWORD: ${CRUMA_DEV_DB_PASSWORD:?CRUMA_DEV_DB_PASSWORD musí být nastaveno v deploy/.env}
+      # Bez hesla PostgreSQL odmítne start; povinnost v compose by rozbila profil prod.
+      POSTGRES_PASSWORD: ${CRUMA_DEV_DB_PASSWORD:-}
     ports:
       # Jen lokální rozhraní vývojového počítače.
       - "127.0.0.1:5432:5432"
@@ -30,5 +34,109 @@ services:
       timeout: 5s
       retries: 10
 
+  # --- Produkce --------------------------------------------------------------------------------------
+  proxy:
+    image: docker.io/library/caddy:2.11.4-alpine
+    profiles: ["prod"]
+    restart: unless-stopped
+    environment:
+      CRUMA_DOMAIN: ${CRUMA_DOMAIN:-}
+    ports:
+      # Veřejné jsou jen porty proxy (SEC-008, deployment-pattern.md §6).
+      - "${CRUMA_HTTP_PORT:-80}:80"
+      - "${CRUMA_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [edge]
+    depends_on: [server]
+
+  server:
+    image: ${CRUMA_SERVER_IMAGE:-ghcr.io/assax/cruma-server}:${CRUMA_VERSION:-unset}
+    profiles: ["prod"]
+    restart: unless-stopped
+    environment:
+      Cruma__Database__ConnectionString: Host=db;Database=cruma;Username=cruma;Password=${CRUMA_DB_PASSWORD:-}
+      Cruma__Identity__Google__ClientId: ${CRUMA_GOOGLE_CLIENT_ID:-}
+      Cruma__Identity__Google__ClientSecret: ${CRUMA_GOOGLE_CLIENT_SECRET:-}
+      Cruma__Sync__MinimumClientVersion: ${CRUMA_MINIMUM_DESKTOP_VERSION:-0.0.0}
+      Cruma__Desktop__FeedPath: /app/desktop-feed
+    volumes:
+      - blob-data:/app/blobs
+      - desktop-feed:/app/desktop-feed:ro
+    networks: [internal, edge]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  migrate:
+    # Stejný image jako server; spouští ho deploy.sh jako samostatný krok (PER-003, OPS-005), ne `up`.
+    image: ${CRUMA_SERVER_IMAGE:-ghcr.io/assax/cruma-server}:${CRUMA_VERSION:-unset}
+    profiles: ["tools"]
+    command: ["migrate"]
+    environment:
+      Cruma__Database__ConnectionString: Host=db;Database=cruma;Username=cruma;Password=${CRUMA_DB_PASSWORD:-}
+    networks: [internal]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: docker.io/library/postgres:18.6-alpine
+    profiles: ["prod", "tools"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cruma
+      POSTGRES_USER: cruma
+      POSTGRES_PASSWORD: ${CRUMA_DB_PASSWORD:-}
+    volumes:
+      - db-data:/var/lib/postgresql
+    # Bez publikovaného portu – dostupná jen ve vnitřní síti (deployment-pattern.md §6).
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cruma -d cruma"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backup:
+    image: cruma-backup:${CRUMA_VERSION:-unset}
+    build:
+      context: ..
+      dockerfile: deploy/backup/backup.Dockerfile
+    profiles: ["prod", "tools"]
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: cruma
+      PGDATABASE: cruma
+      PGPASSWORD: ${CRUMA_DB_PASSWORD:-}
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:-}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD:-}
+      AWS_ACCESS_KEY_ID: ${RESTIC_AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${RESTIC_AWS_SECRET_ACCESS_KEY:-}
+      CRUMA_BACKUP_TIME: ${CRUMA_BACKUP_TIME:-03:30}
+    volumes:
+      - blob-data:/blobs:ro
+      # Lokální repozitář jen pro zkoušku nanečisto (RESTIC_REPOSITORY=/local-repository); v produkci S3.
+      - backup-local:/local-repository
+    networks: [internal, egress]
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  internal:
+    internal: true
+  edge: {}
+  egress: {}
+
 volumes:
   db-dev-data:
+  db-data:
+  blob-data:
+  caddy-data:
+  caddy-config:
+  desktop-feed:
+  backup-local:

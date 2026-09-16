@@ -39,3 +39,6 @@ Thumbs.db
 
 # Sestavený balík editoru (vzniká při buildu)
 src/Cruma.Ui.Editor/wwwroot/cruma-editor.js
+
+# Stav nasazení na serveru
+deploy/.deployed-version

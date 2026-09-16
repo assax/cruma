@@ -12,6 +12,7 @@ public static class InfrastructureModule
 
     /// <summary>
     /// Endpointy dostupné bez přihlášení (API-003). Architektonický test hlídá, že žádný jiný endpoint anonymní není.
+    /// Mimo endpointy jsou anonymní jen statické soubory: klient Cruma.Web a feed desktopu pod <c>/desktop/</c> (N-6).
     /// </summary>
     public static readonly IReadOnlySet<string> AnonymousAllowlist = new HashSet<string>(StringComparer.Ordinal)
     {

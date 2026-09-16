@@ -57,5 +57,8 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
 - **Desktop: lokální úložiště, synchronizace a instalátor (etapa E-5).** SQLite s logem čekajících změn a lokálními
   verzemi, FTS5 index v konformní sadě spolu s PostgreSQL, synchronizační engine s integračními testy proti serveru,
   WPF shell se stejným UI jako web, balíček Velopack a feed na serveru, výkonový scénář s 50 000 poznámkami.
+- **Příprava nasazení (etapa E-6).** Image serveru, produkční compose s proxy Caddy (automatické TLS), šifrované
+  denní zálohy restic, `deploy.sh` se zálohou, migrací, kontrolou zdraví a návratem, postup obnovy a release workflow
+  – vyzkoušeno nanečisto v Podmanu včetně obnovy po ztrátě databáze; produkce čeká na doménu a VPS.
 - **Izolace uživatelů a konformní sada vyhledávání.** Každý endpoint i synchronizace ověřeně nevydá data jiného
   uživatele; vyhledávání nad PostgreSQL vrací stejné výsledky jako referenční vyhodnocení.
