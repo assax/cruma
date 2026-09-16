@@ -73,6 +73,34 @@ public sealed class BrowserPreferences(BrowserModule browser) : IPreferences
     public async ValueTask SetAsync(string key, string value) => await (await browser.GetAsync()).InvokeVoidAsync("setPreference", key, value);
 }
 
+/// <summary>Tenký klient nesynchronizuje – každá změna jde hned na server (FR-29 akc. 2).</summary>
+public sealed class NoSyncStatus : ISyncStatusView
+{
+    public SyncIndicator? Current => null;
+
+    public event Action? Changed
+    {
+        add { }
+        remove { }
+    }
+
+    public void SyncNow()
+    {
+    }
+}
+
+/// <summary>PWA se aktualizuje sama přes service worker; aktualizace v aplikaci nenabízí.</summary>
+public sealed class NoAppUpdates : IAppUpdates
+{
+    public bool Supported => false;
+
+    public string CurrentVersion => typeof(NoAppUpdates).Assembly.GetName().Version?.ToString() ?? "0.0.0";
+
+    public Task<AppUpdateInfo?> CheckAsync(CancellationToken cancellationToken = default) => Task.FromResult<AppUpdateInfo?>(null);
+
+    public Task ApplyAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+}
+
 /// <summary>Schopnosti tenkého klienta (ui-pattern.md §2).</summary>
 public sealed class WebCapabilities : ICapabilities
 {

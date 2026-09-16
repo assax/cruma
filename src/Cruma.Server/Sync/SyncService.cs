@@ -78,10 +78,18 @@ internal sealed class SyncService(
         // Víc záznamů téže entity v jedné stránce nese stejný aktuální stav – stačí poslední.
         var latest = page.GroupBy(entry => (entry.EntityType, entry.EntityId)).Select(group => group.Last()).OrderBy(entry => entry.Sequence);
 
+        // Poznámky stránky se načtou jedním dotazem (první synchronizace desítek tisíc poznámek, NFR-7).
+        var noteIds = latest.Where(entry => entry.EntityType == SyncEntityType.Note).Select(entry => entry.EntityId).ToList();
+        var notesById = (await notes.GetNotesAsync(noteIds, cancellationToken)).ToDictionary(note => note.Id);
+
         var entries = new List<ChangeFeedEntry>();
         foreach (var entry in latest)
         {
-            entries.Add(await ToFeedEntryAsync(entry, cancellationToken));
+            entries.Add(entry.EntityType == SyncEntityType.Note
+                ? notesById.TryGetValue(entry.EntityId, out var note)
+                    ? new ChangeFeedEntry(entry.Sequence, entry.EntityType, entry.EntityId, note.Version, false, Note: ToPayload(note))
+                    : new ChangeFeedEntry(entry.Sequence, entry.EntityType, entry.EntityId, null, true)
+                : await ToFeedEntryAsync(entry, cancellationToken));
         }
 
         return new PullResponse(entries, page.Count > 0 ? page[^1].Sequence : request.Cursor, read.Count > take);

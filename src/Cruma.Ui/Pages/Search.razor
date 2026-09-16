@@ -1,6 +1,7 @@
 @page "/search"
 @inject ISearchData SearchData
 @inject IConnectivity Connectivity
+@inject ICapabilities Capabilities
 
 <h1>Hledat</h1>
 
@@ -13,7 +14,7 @@
         <option value="@NoteState.Archived">Archiv</option>
         <option value="@NoteState.Trashed">Koš</option>
     </select>
-    <button type="submit" class="cruma-button primary" disabled="@(!Connectivity.IsOnline)">Hledat</button>
+    <button type="submit" class="cruma-button primary" disabled="@(!Connectivity.IsOnline && !Capabilities.WorksOffline)">Hledat</button>
 </form>
 
 @if (error is not null)

@@ -3,6 +3,8 @@
 @inject ISessionData Session
 @inject CrumaUiState Ui
 @inject IConnectivity Connectivity
+@inject ICapabilities Capabilities
+@inject IAppUpdates Updates
 @inject NavigationManager Navigation
 
 <h1>Nastavení</h1>
@@ -80,6 +82,27 @@
     <p class="error" role="alert">@error</p>
 }
 
+@if (Updates.Supported)
+{
+    <section class="block" aria-labelledby="updates-heading">
+        <h2 id="updates-heading">Aktualizace</h2>
+        <p class="muted">Verze @Updates.CurrentVersion</p>
+        @if (update is not null)
+        {
+            <p>Je dostupná verze @update.Version.</p>
+            <button type="button" class="cruma-button primary" @onclick="ApplyUpdateAsync">Nainstalovat a restartovat</button>
+        }
+        else
+        {
+            <button type="button" class="cruma-button" @onclick="CheckUpdatesAsync">Zkontrolovat aktualizace</button>
+            @if (updateMessage is not null)
+            {
+                <span class="muted">@updateMessage</span>
+            }
+        }
+    </section>
+}
+
 <section class="block">
     <button type="button" class="cruma-button" @onclick="SignOutAsync">Odhlásit se</button>
 </section>
@@ -93,7 +116,7 @@
     private string renameText = string.Empty;
     private string? error;
 
-    private bool Offline => !Connectivity.IsOnline;
+    private bool Offline => !Connectivity.IsOnline && !Capabilities.WorksOffline;
 
     protected override Task OnInitializedAsync() => ReloadAsync();
 
@@ -146,6 +169,17 @@
 
         await ReloadAsync();
     }
+
+    private AppUpdateInfo? update;
+    private string? updateMessage;
+
+    private async Task CheckUpdatesAsync()
+    {
+        update = await Updates.CheckAsync();
+        updateMessage = update is null ? "Používáte nejnovější verzi." : null;
+    }
+
+    private Task ApplyUpdateAsync() => Updates.ApplyAsync();
 
     private async Task SignOutAsync()
     {

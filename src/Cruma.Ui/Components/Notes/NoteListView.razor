@@ -1,6 +1,7 @@
 @implements IDisposable
 @inject INoteData Notes
 @inject IConnectivity Connectivity
+@inject ICapabilities Capabilities
 
 @*
     Seznam poznámek v jednom stavu (FR-5): přehled aktivních (připnuté první – řadí server, FR-2 akc. 3), archiv, koš.
@@ -27,13 +28,13 @@ else
             <NoteCard Note="note">
                 @if (State == NoteState.Archived)
                 {
-                    <button type="button" class="cruma-button" disabled="@(!Connectivity.IsOnline)" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Unarchive)">Vrátit z archivu</button>
+                    <button type="button" class="cruma-button" disabled="@ActionsDisabled" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Unarchive)">Vrátit z archivu</button>
                 }
                 else if (State == NoteState.Trashed)
                 {
-                    <button type="button" class="cruma-button" disabled="@(!Connectivity.IsOnline)" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Restore)">Obnovit</button>
+                    <button type="button" class="cruma-button" disabled="@ActionsDisabled" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Restore)">Obnovit</button>
                     <ConfirmButton Text="Smazat natrvalo" Question="Smazat natrvalo i s historií?" ConfirmText="Smazat" CssClass="danger"
-                                   Disabled="@(!Connectivity.IsOnline)" Confirmed="() => DeleteAsync(note.Id)" />
+                                   Disabled="@ActionsDisabled" Confirmed="() => DeleteAsync(note.Id)" />
                 }
             </NoteCard>
         }
@@ -70,6 +71,9 @@ else
 
     [Parameter]
     public string EmptyText { get; set; } = "Zatím tu nic není.";
+
+    // Tenký klient bez připojení nemění existující poznámky (FR-29 akc. 4); plně offline shell ano (FR-26 akc. 1).
+    private bool ActionsDisabled => !Connectivity.IsOnline && !Capabilities.WorksOffline;
 
     private int PageCount => page is null ? 1 : Math.Max(1, (int)Math.Ceiling(page.TotalCount / (double)PageSize));
 

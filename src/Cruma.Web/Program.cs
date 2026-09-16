@@ -33,6 +33,8 @@ builder.Services.AddSingleton<BrowserConnectivity>();
 builder.Services.AddSingleton<IConnectivity>(provider => provider.GetRequiredService<BrowserConnectivity>());
 builder.Services.AddSingleton<IPreferences, BrowserPreferences>();
 builder.Services.AddSingleton<ICapabilities, WebCapabilities>();
+builder.Services.AddSingleton<ISyncStatusView, NoSyncStatus>();
+builder.Services.AddSingleton<IAppUpdates, NoAppUpdates>();
 builder.Services.AddSingleton<WriteQueue>();
 builder.Services.AddSingleton<IPendingNotes>(provider => provider.GetRequiredService<WriteQueue>());
 builder.Services.AddSingleton<INoteData, WebNoteData>();

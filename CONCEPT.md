@@ -808,4 +808,5 @@ Aplikace je úspěšná, pokud:
 1. rychlost vytvoření jednoduché poznámky je srovnatelná s Google Keep,
 2. běžné použití není komplikováno pokročilými funkcemi,
 3. technická poznámka může obsahovat bohatý obsah,
-4. _(doplnit — původní text byl v tomto bodě useknutý)_
+4. uživatel může plnohodnotně pracovat offline a po obnovení spojení se změny ze všech zařízení synchronizují bez tiché ztráty dat,
+5. data lze kdykoliv kompletně exportovat do otevřených formátů.

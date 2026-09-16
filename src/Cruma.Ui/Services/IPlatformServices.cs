@@ -34,6 +34,35 @@ public interface IPreferences
     ValueTask SetAsync(string key, string value);
 }
 
+/// <summary>Stav synchronizace pro zobrazení (SYN-007); <c>null</c>, pokud shell synchronizaci nemá (tenký klient).</summary>
+public sealed record SyncIndicator(string State, string Label, string? Detail);
+
+public interface ISyncStatusView
+{
+    SyncIndicator? Current { get; }
+
+    event Action? Changed;
+
+    /// <summary>Spustí synchronizaci hned (tlačítko v UI).</summary>
+    void SyncNow();
+}
+
+/// <summary>Dostupná aktualizace aplikace (FR-37 akc. 4).</summary>
+public sealed record AppUpdateInfo(string Version);
+
+/// <summary>Aktualizace aplikace; jen shelly, které se instalují (desktop).</summary>
+public interface IAppUpdates
+{
+    bool Supported { get; }
+
+    string CurrentVersion { get; }
+
+    Task<AppUpdateInfo?> CheckAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Stáhne a nainstaluje aktualizaci bez práv administrátora a restartuje aplikaci.</summary>
+    Task ApplyAsync(CancellationToken cancellationToken = default);
+}
+
 /// <summary>Nové poznámky čekající na odeslání (FR-30 akc. 2).</summary>
 public interface IPendingNotes
 {

@@ -54,7 +54,8 @@ public sealed class CrumaServerFactory : WebApplicationFactory<Program>
             builder.UseSetting(key, value);
         }
 
-        builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning));
+        // Testy technické logy nepotřebují; výpis do konzole by zkresloval i výkonový scénář.
+        builder.ConfigureLogging(logging => logging.ClearProviders());
         builder.ConfigureTestServices(services =>
         {
             if (!UseRealAuthentication)

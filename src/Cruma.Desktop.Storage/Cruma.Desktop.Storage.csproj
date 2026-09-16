@@ -9,6 +9,8 @@
     <ProjectReference Include="..\Cruma.Sync\Cruma.Sync.csproj" />
     <ProjectReference Include="..\Cruma.Blobs\Cruma.Blobs.csproj" />
     <ProjectReference Include="..\Cruma.Api.Contracts\Cruma.Api.Contracts.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

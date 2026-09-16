@@ -100,6 +100,19 @@ public class NoteListViewTests : UiTestContext
     }
 
     [Test]
+    public void Offline_ShellWorkingOffline_KeepsActionsEnabled()
+    {
+        Connectivity.SetupGet(connectivity => connectivity.IsOnline).Returns(false);
+        Capabilities.SetupGet(capabilities => capabilities.WorksOffline).Returns(true);
+        NoteData.Setup(notes => notes.ListAsync(NoteState.Archived, null, null, 1, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DataResult<PageResult<NoteItem>>.Success(new PageResult<NoteItem>([Note(Guid.Parse("00000000-0000-0000-0000-000000000004"), "archiv", NoteState.Archived)], 1)));
+
+        var cut = Render<NoteListView>(parameters => parameters.Add(view => view.State, NoteState.Archived));
+
+        Assert.That(cut.FindAll("button").Single(button => button.TextContent == "Vrátit z archivu").HasAttribute("disabled"), Is.False, "FR-26 akc. 1");
+    }
+
+    [Test]
     public void Offline_ActionsOnExistingNotes_AreDisabled()
     {
         Connectivity.SetupGet(connectivity => connectivity.IsOnline).Returns(false);

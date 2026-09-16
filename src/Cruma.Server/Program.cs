@@ -32,6 +32,9 @@ app.UseStatusCodePages();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
+// Instalátor a aktualizační feed desktopu jako statické soubory bez přihlášení (I1-D-5, plan.md N-6).
+app.UseDesktopFeed(builder.Configuration);
+
 app.UseAuthentication();
 app.UseAuthorization();
 

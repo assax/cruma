@@ -15,6 +15,10 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
   na diakritiku, kategorie a štítky, světlý a tmavý režim.
 - **Souběžné úpravy bez ztráty.** Změny téže poznámky z více zařízení se sloučí; když se stejný odstavec změní na
   dvou místech, aplikace ukáže obě verze a nechá vybrat nebo upravit.
+- **Desktop pro Windows.** Plnohodnotná práce bez připojení nad lokální databází: poznámky, kategorie, štítky,
+  hledání bez ohledu na diakritiku, archiv, koš i řešení konfliktů. Po připojení se změny samy synchronizují se
+  serverem a změny z telefonu se stáhnou; stav synchronizace je vidět v hlavičce. Instalace pro uživatele bez práv
+  administrátora s aktualizacemi ze serveru Cruma. Vývojový build má vlastní data a v titulku „(dev)“.
 - **Poznámka i bez připojení.** Bez sítě jde napsat novou poznámku – počká ve frontě a po obnovení spojení se odešle
   sama; ostatní akce jsou do té doby vypnuté a aplikace ukazuje stav Offline.
 
@@ -50,5 +54,8 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
 - **Sdílené UI, editor a API klient (etapa E-4).** `Cruma.Ui` s rozhraními služeb a schopnostmi shellu,
   `Cruma.Ui.Editor` s TipTap balíkem sestavovaným v buildu (vyžaduje Node.js) a vlastním rozšířením identifikátorů
   bloků, typovaný `Cruma.Api.Client`, bUnit a vitest testy – aby desktop v E-5 použil stejné komponenty.
+- **Desktop: lokální úložiště, synchronizace a instalátor (etapa E-5).** SQLite s logem čekajících změn a lokálními
+  verzemi, FTS5 index v konformní sadě spolu s PostgreSQL, synchronizační engine s integračními testy proti serveru,
+  WPF shell se stejným UI jako web, balíček Velopack a feed na serveru, výkonový scénář s 50 000 poznámkami.
 - **Izolace uživatelů a konformní sada vyhledávání.** Každý endpoint i synchronizace ověřeně nevydá data jiného
   uživatele; vyhledávání nad PostgreSQL vrací stejné výsledky jako referenční vyhodnocení.

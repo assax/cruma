@@ -23,6 +23,8 @@ public abstract class UiTestContext : BunitContext
         Services.AddSingleton(Preferences.Object);
         Services.AddSingleton(Capabilities.Object);
         Services.AddSingleton(Pending.Object);
+        Services.AddSingleton(SyncStatus.Object);
+        Services.AddSingleton(Updates.Object);
         Services.AddCrumaUi();
 
         Connectivity.SetupGet(connectivity => connectivity.IsOnline).Returns(true);
@@ -50,6 +52,10 @@ public abstract class UiTestContext : BunitContext
     protected Mock<ICapabilities> Capabilities { get; } = new();
 
     protected Mock<IPendingNotes> Pending { get; } = new();
+
+    protected Mock<ISyncStatusView> SyncStatus { get; } = new();
+
+    protected Mock<IAppUpdates> Updates { get; } = new();
 
     protected static ContentBlock Paragraph(string id, string text) =>
         ContentBlock.FromJson(System.Text.Json.Nodes.JsonNode.Parse(

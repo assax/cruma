@@ -8,3 +8,4 @@ Pravidla a šablona záznamu jsou v [README.md](README.md).
 | 002 | E-2 Sdílená logika | 2026-09-16 22:48 | 2026-09-16 22:59 | 11 min | hotovo | – | T-8..T-18 | [sprint-002](sprint-002-2026-09-16-e2-sdilena-logika.md) |
 | 003 | E-3 Server | 2026-09-16 23:16 | 2026-09-16 23:49 | 33 min | hotovo (bez Googlu) | – | T-21..T-31 | [sprint-003](sprint-003-2026-09-16-e3-server.md) |
 | 004 | E-4 Sdílené UI a tenký klient | 2026-09-16 23:51 | 2026-09-17 00:18 | 27 min | hotovo | – | T-32..T-46 | [sprint-004](sprint-004-2026-09-16-e4-ui-web.md) |
+| 005 | E-5 Desktop | 2026-09-17 00:18 | 2026-09-17 01:15 | 57 min | hotovo (bez přihlášení PKCE) | – | T-47..T-55 | [sprint-005](sprint-005-2026-09-17-e5-desktop.md) |

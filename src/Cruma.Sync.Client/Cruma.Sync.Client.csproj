@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Cruma.Sync\Cruma.Sync.csproj" />
     <ProjectReference Include="..\Cruma.Desktop.Storage\Cruma.Desktop.Storage.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
 </Project>

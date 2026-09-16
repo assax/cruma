@@ -2,6 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cruma.Sync.Client\Cruma.Sync.Client.csproj" />
+    <!-- Testovací server, databáze v kontejneru a pomocná volání REST ze serverových testů. -->
+    <ProjectReference Include="..\Cruma.Server.Tests\Cruma.Server.Tests.csproj" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
 </Project>
