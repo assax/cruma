@@ -87,7 +87,7 @@ defaults to them.
 
 | Host | Target |
 |---|---|
-| Desktop | rolling files in `%LOCALAPPDATA%\Cruma\logs\`, size-capped with a small number of archives, so logs cannot fill the disk |
+| Desktop | rolling files in `logs\` of the app data folder (`%LOCALAPPDATA%\Cruma\`, Debug build `%LOCALAPPDATA%\Cruma\dev\` — PER-006), size-capped with a small number of archives, so logs cannot fill the disk |
 | Server | console (collected by the container runtime); optionally a rolling file on the volume |
 | Web (WebAssembly) | browser console only; no file target |
 

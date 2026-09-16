@@ -2,7 +2,7 @@
 
 > **Type:** Convention
 > **Scope:** shared
-> **Registered rules:** NAM-001..NAM-003, LOG-001, STR-004
+> **Registered rules:** NAM-001..NAM-003, LOG-001, STR-004, PER-006
 > **Note:** conventions keep code predictable; violating one does not break architecture, but consistently
 > ignoring them degrades maintainability.
 
@@ -24,7 +24,7 @@ Naming and style for Cruma code in C#, Razor, TypeScript, and the database.
 | Database (server) | `cruma` | — |
 | Database schemas | module name, snake_case (NAM-003) | `notes`, `audit`, `sync` |
 | Local database file | `cruma-<userId>.db` in `%LOCALAPPDATA%\Cruma\` | — |
-| App data folder | `%LOCALAPPDATA%\Cruma\` | logs, blobs, tokens |
+| App data folder | `%LOCALAPPDATA%\Cruma\`; Debug build `%LOCALAPPDATA%\Cruma\dev\` (PER-006) | logs, blobs, tokens |
 | Editor JS package | `@cruma/editor` | — |
 | Container images | `cruma-server` | `cruma-server:1.4.0` |
 | Compose project | `cruma` | — |

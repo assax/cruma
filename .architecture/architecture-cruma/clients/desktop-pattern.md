@@ -2,7 +2,7 @@
 
 > **Type:** Pattern
 > **Scope:** desktop
-> **Enforces:** PER-001, PER-005, SEC-002, SEC-003, SYN-004, SYN-007, ERR-002, AI-001
+> **Enforces:** PER-001, PER-005, PER-006, SEC-002, SEC-003, SYN-004, SYN-007, ERR-002, AI-001
 > **Derived from:** D-1, D-3.2, D-5.2, D-7, D-8.1, C-6, C-7a, C-8, C-11; SPEC FR-26, FR-27, FR-32, FR-33, FR-37, NFR-3
 
 ## Purpose
@@ -39,6 +39,9 @@ installer on older systems.
 - Never contains tokens or API keys (PER-005). Not encrypted by the application (NFR-9).
 - Local migrations are applied automatically at application start (the desktop has no separate deployment
   step), after copying the database file to a backup file next to it.
+- The app data folder is resolved in one place in the composition root. A Debug build uses
+  `%LOCALAPPDATA%\Cruma\dev\` for the database, blobs, logs and tokens and shows "(dev)" in the window title, so
+  development never touches the data of the installed application (PER-006).
 
 ## 2.1 Pending change log
 

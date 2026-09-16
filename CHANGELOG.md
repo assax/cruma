@@ -14,3 +14,6 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
   aby vývoj začínal od schválených rozhodnutí, ne od kódu.
 - **Struktura repozitáře podle Susceptoru a Symbolonu.** Dokumenty v kořeni (`AGENTS.md`, `CHANGES.md`,
   `BUGS.md`, `CHANGELOG.md`) a záznamy sprintů v `dev/`.
+- **Oddělená data vývojového buildu desktopu (pravidlo PER-006).** Debug build bude mít data
+  v `%LOCALAPPDATA%\Cruma\dev\` a v titulku „(dev)“ – aby vývoj a zkoušky nesahaly na skutečné poznámky
+  nainstalované verze.

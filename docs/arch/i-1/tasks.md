@@ -624,11 +624,13 @@ T-47: Lokální úložiště desktopu
   SPEC/FR linkage:   FR-26, FR-6
   Scope hint:        src/Cruma.Desktop.Storage/
   Depends on:        E-4
-  Profile rules:     PER-001, PER-005, SYN-004
+  Profile rules:     PER-001, PER-005, PER-006, SYN-004
   Done-when:         SQLite databáze pro přihlášeného uživatele s poznámkami, kategoriemi, štítky, lokálními
                      verzemi, logem čekajících změn a kurzorem podle desktop-pattern.md §2; lokální migrace se
                      aplikují při startu po zálohování souboru databáze; databáze neobsahuje tokeny ani tajné
-                     údaje (PER-005).
+                     údaje (PER-005); Debug build má data (databáze, bloby, logy, tokeny) v
+                     %LOCALAPPDATA%\Cruma\dev\ a v titulku „(dev)“, Release build v %LOCALAPPDATA%\Cruma\
+                     (PER-006; doplněno 2026-09-16 z CHANGES 1).
 ```
 
 ```text

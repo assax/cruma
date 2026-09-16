@@ -602,6 +602,15 @@ Rule: The desktop local database must not contain authentication tokens, API key
 Rationale: The local database is not encrypted (NFR-9).
 ```
 
+```rule
+RuleID: PER-006
+Category: Persistence
+Severity: High
+Scope: Desktop
+Rule: A development (Debug) build of the desktop uses its own app data folder `%LOCALAPPDATA%\Cruma\dev\` for the local database, blobs, logs and tokens, and shows "(dev)" in the window title. It must never read or write the app data of an installed (Release) build.
+Rationale: The local database holds the author's real notes; development and testing must not touch them (operator change 2026-09-16, CHANGES.md 1).
+```
+
 ---
 
 # 11. UI Rules
