@@ -43,6 +43,21 @@ public static class ArchitectureRules
                 .Select(package => $"Nepovolený balíček ve sdílené logice: {project.Name} → {package}"))
             .ToList();
 
+    /// <summary>
+    /// UI-001, UI-002: zdrojové soubory sdíleného UI nepoužívají JS interop, HttpClient ani platformní API přímo.
+    /// Výjimkou pro JS interop je jen Cruma.Ui.Editor.
+    /// </summary>
+    public static IReadOnlyList<string> FindForbiddenUiApis(IEnumerable<(string Project, string File, string Source)> sources)
+    {
+        string[] jsApis = ["IJSRuntime", "IJSObjectReference", "IJSInProcessRuntime"];
+        string[] platformApis = ["HttpClient", "System.Windows", "Microsoft.Maui", "OperatingSystem.Is"];
+        return sources
+            .SelectMany(source => (source.Project == "Cruma.Ui.Editor" ? platformApis : jsApis.Concat(platformApis))
+                .Where(api => source.Source.Contains(api, StringComparison.Ordinal))
+                .Select(api => $"Zakázané API ve sdíleném UI: {source.Project}/{source.File} → {api}"))
+            .ToList();
+    }
+
     /// <summary>LOG-003: balíčky NLog jen v kompozičních kořenech.</summary>
     public static IReadOnlyList<string> FindNLogOutsideCompositionRoots(IEnumerable<ProjectFile> projects) =>
         projects.Where(project => !CompositionRoots.Contains(project.Name))

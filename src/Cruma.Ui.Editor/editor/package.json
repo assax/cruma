@@ -1,0 +1,21 @@
+{
+  "name": "@cruma/editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Editor poznámek Cruma – TipTap jako JS ostrov (content-document-pattern.md §3)",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --format=esm --target=es2022 --minify --outfile=../wwwroot/cruma-editor.js",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@tiptap/core": "3.31.3",
+    "@tiptap/extension-highlight": "3.31.3",
+    "@tiptap/extension-list": "3.31.3",
+    "@tiptap/pm": "3.31.3",
+    "@tiptap/starter-kit": "3.31.3",
+    "esbuild": "0.28.2",
+    "jsdom": "30.0.1",
+    "vitest": "5.0.1"
+  }
+}

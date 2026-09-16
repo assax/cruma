@@ -1,0 +1,113 @@
+@using System.Text.Json.Nodes
+@inject INoteData Notes
+
+@*
+    Řešení konfliktů (FR-28 akc. 2, 3): každý konfliktní blok ukáže obě varianty; uživatel jednu vybere nebo text
+    upraví ručně. Vyřešení vytvoří novou verzi.
+*@
+<section class="conflicts" aria-label="Konflikty">
+    <h2>Konflikt úprav</h2>
+    <p>Tento odstavec byl současně změněn na dvou místech. Vyberte, která verze platí, nebo text upravte.</p>
+    @foreach (var conflict in Conflicts)
+    {
+        <div class="conflict">
+            <div class="variants">
+                <div class="variant">
+                    <h3>@Origin("Uloženo dříve", conflict.CurrentOrigin)</h3>
+                    <p>@Text(conflict.Current)</p>
+                    <button type="button" class="cruma-button" disabled="@busy" @onclick="() => ChooseAsync(conflict, ConflictSide.Current)">Ponechat tuto</button>
+                </div>
+                <div class="variant">
+                    <h3>@Origin("Uloženo později", conflict.IncomingOrigin)</h3>
+                    <p>@Text(conflict.Incoming)</p>
+                    <button type="button" class="cruma-button" disabled="@busy" @onclick="() => ChooseAsync(conflict, ConflictSide.Incoming)">Ponechat tuto</button>
+                </div>
+            </div>
+            @if (editing == conflict.BlockId)
+            {
+                <textarea @bind="editedText" rows="4" aria-label="Upravený text"></textarea>
+                <div class="edit-actions">
+                    <button type="button" class="cruma-button primary" disabled="@busy" @onclick="() => SaveEditAsync(conflict)">Uložit úpravu</button>
+                    <button type="button" class="cruma-button" @onclick="() => editing = null">Zrušit</button>
+                </div>
+            }
+            else
+            {
+                <button type="button" class="cruma-button" disabled="@busy" @onclick="() => StartEdit(conflict)">Upravit ručně</button>
+            }
+        </div>
+    }
+    @if (error is not null)
+    {
+        <p class="error" role="alert">@error</p>
+    }
+</section>
+
+@code {
+    private bool busy;
+    private string? editing;
+    private string editedText = string.Empty;
+    private string? error;
+
+    [Parameter, EditorRequired]
+    public NoteItem Note { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<NoteSaveResult> Resolved { get; set; }
+
+    private IEnumerable<ConflictBlock> Conflicts => Note.Document.Blocks.Select(ConflictBlock.TryRead).OfType<ConflictBlock>();
+
+    private static string Text(ContentBlock block) => PlainTextExtractor.Extract(null, ContentDocument.Create([block]));
+
+    private static string Origin(string label, ConflictOrigin origin) =>
+        $"{label} ({ClientName(origin.ClientType)}, {origin.ChangedAtUtc.ToLocalTime():d. M. HH:mm})";
+
+    private static string ClientName(string clientType) => clientType switch
+    {
+        "desktop" => "desktop",
+        "web" => "web",
+        "mobile" => "mobil",
+        _ => clientType,
+    };
+
+    private void StartEdit(ConflictBlock conflict)
+    {
+        editing = conflict.BlockId;
+        editedText = $"{Text(conflict.Current)}\n{Text(conflict.Incoming)}";
+    }
+
+    private Task ChooseAsync(ConflictBlock conflict, ConflictSide side) => ResolveAsync(conflict.BlockId, side, null);
+
+    // Ruční úprava nahradí konflikt odstavcem se stejným identifikátorem bloku (CNT-002).
+    private Task SaveEditAsync(ConflictBlock conflict)
+    {
+        var paragraph = new JsonObject
+        {
+            ["type"] = "paragraph",
+            ["attrs"] = new JsonObject { ["id"] = conflict.BlockId },
+            ["content"] = new JsonArray(new JsonObject { ["type"] = "text", ["text"] = editedText.Trim() }),
+        };
+        if (string.IsNullOrWhiteSpace(editedText))
+        {
+            paragraph.Remove("content");
+        }
+
+        return ResolveAsync(conflict.BlockId, null, ContentBlock.FromJson(paragraph));
+    }
+
+    private async Task ResolveAsync(string blockId, ConflictSide? side, ContentBlock? edited)
+    {
+        busy = true;
+        var result = await Notes.ResolveConflictAsync(Note.Id, Note.Version, blockId, side, edited);
+        busy = false;
+        if (!result.IsSuccess)
+        {
+            error = ErrorText.For(result.Error!);
+            return;
+        }
+
+        error = null;
+        editing = null;
+        await Resolved.InvokeAsync(result.Value);
+    }
+}

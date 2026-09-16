@@ -35,6 +35,23 @@ public class SolutionStructureTests
     }
 
     [Test]
+    public void SharedUi_DoesNotUseJsHttpOrPlatformApis()
+    {
+        var sources = new[] { "Cruma.Ui", "Cruma.Ui.Editor" }
+            .SelectMany(project => Directory
+                .EnumerateFiles(Path.Combine(RepositoryLayout.Root, "src", project), "*.*", SearchOption.AllDirectories)
+                .Where(file => file.EndsWith(".razor", StringComparison.Ordinal) || file.EndsWith(".cs", StringComparison.Ordinal))
+                .Where(file => !file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !file.Contains("node_modules", StringComparison.Ordinal))
+                .Select(file => (project, Path.GetFileName(file), File.ReadAllText(file))))
+            .ToList();
+
+        Assert.That(sources, Is.Not.Empty);
+        Assert.That(ArchitectureRules.FindForbiddenUiApis(sources), Is.Empty);
+    }
+
+    [Test]
     public void NLogPackages_OnlyInCompositionRoots()
     {
         Assert.That(ArchitectureRules.FindNLogOutsideCompositionRoots(productionProjects.Concat(testProjects)), Is.Empty);

@@ -108,6 +108,23 @@ public class ArchitectureRulesTests
             Is.EqualTo(new[] { "NLog mimo kompoziční kořen: Cruma.Ui → NLog" }));
     }
 
+    [Test]
+    public void FindForbiddenUiApis_JsInUiButAllowedInEditor_ReportsOnlyUi()
+    {
+        var violations = ArchitectureRules.FindForbiddenUiApis(
+        [
+            ("Cruma.Ui", "Page.razor", "@inject IJSRuntime JS"),
+            ("Cruma.Ui.Editor", "CrumaEditor.razor", "@inject IJSRuntime JS"),
+            ("Cruma.Ui.Editor", "Bad.cs", "new HttpClient()"),
+        ]);
+
+        Assert.That(violations, Is.EqualTo(new[]
+        {
+            "Zakázané API ve sdíleném UI: Cruma.Ui/Page.razor → IJSRuntime",
+            "Zakázané API ve sdíleném UI: Cruma.Ui.Editor/Bad.cs → HttpClient",
+        }));
+    }
+
     private static ProjectFile Project(string name, string[]? references = null, string[]? packages = null) =>
         new(name, (references ?? []).ToHashSet(), (packages ?? []).ToHashSet());
 }

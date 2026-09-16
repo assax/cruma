@@ -88,6 +88,12 @@ public static class IdentityModule
             return Results.Challenge(properties, [provider]);
         }).AllowAnonymous();
 
+        auth.MapGet("/providers", async (IAuthenticationSchemeProvider schemes, Microsoft.Extensions.Options.IOptions<IdentityRuntimeOptions> options) =>
+        {
+            var external = (await schemes.GetRequestHandlerSchemesAsync()).Select(scheme => scheme.Name).Where(name => name == GoogleProvider).ToList();
+            return Results.Ok(new SignInProvidersDto(external, options.Value.DevelopmentSignInEnabled));
+        }).AllowAnonymous();
+
         auth.MapGet("/callback", async (HttpContext context, string? returnUrl, IIdentityService identity) =>
         {
             var external = await context.AuthenticateAsync(ExternalScheme);

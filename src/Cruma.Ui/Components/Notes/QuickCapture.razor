@@ -1,0 +1,84 @@
+@inject INoteData Notes
+@inject IConnectivity Connectivity
+@inject ICapabilities Capabilities
+
+@*
+    Rychlé zachycení (FR-1, UI-005, ui-pattern.md §3): pole je po otevření aktivní, stačí psát a uložit
+    (tlačítko, Ctrl+Enter nebo opuštění pole). Nic dalšího se nevyžaduje; poznámka jde do výchozí kategorie.
+*@
+<section class="quick-capture" @onfocusout="OnFocusOutAsync" @onkeydown="OnKeyDownAsync">
+    <CrumaEditor @ref="editor" Document="document" DocumentChanged="OnDocumentChanged" DocumentKey="@captureKey.ToString()"
+                 AutoFocus="true" ShowToolbar="false" Placeholder="Napište poznámku…" DebounceMilliseconds="150" />
+    <div class="capture-actions">
+        <button type="button" class="cruma-button primary" disabled="@(!CanSave)" @onclick="SaveAsync">Uložit</button>
+        @if (!Connectivity.IsOnline && Capabilities.QueuesNewNotesOffline)
+        {
+            <span class="hint">Bez připojení – poznámka počká ve frontě a odešle se sama.</span>
+        }
+        @if (message is not null)
+        {
+            <span class="hint" role="status">@message</span>
+        }
+    </div>
+</section>
+
+@code {
+    private CrumaEditor? editor;
+    private ContentDocument document = ContentDocument.Empty;
+    private int captureKey;
+    private bool saving;
+    private string? message;
+
+    /// <summary>Poznámka byla uložena nebo zařazena do fronty.</summary>
+    [Parameter]
+    public EventCallback<NoteCreateResult> Captured { get; set; }
+
+    private bool HasText => PlainTextExtractor.Extract(null, document).Trim().Length > 0;
+
+    private bool CanSave => !saving && (Connectivity.IsOnline || Capabilities.QueuesNewNotesOffline || Capabilities.WorksOffline);
+
+    private void OnDocumentChanged(ContentDocument changed)
+    {
+        document = changed;
+        message = null;
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && args.CtrlKey)
+        {
+            await SaveAsync();
+        }
+    }
+
+    // Opuštění pole uloží rozepsanou poznámku (SaveAsync nejdřív převezme změnu čekající v editoru).
+    private Task OnFocusOutAsync() => SaveAsync();
+
+    private async Task SaveAsync()
+    {
+        if (editor is not null)
+        {
+            await editor.FlushAsync();
+        }
+
+        if (saving || !HasText)
+        {
+            return;
+        }
+
+        saving = true;
+        var result = await Notes.CreateAsync(Guid.CreateVersion7(), document);
+        saving = false;
+
+        if (!result.IsSuccess)
+        {
+            message = ErrorText.For(result.Error!);
+            return;
+        }
+
+        message = result.Value.Queued ? "Uloženo do fronty, odešle se po připojení." : "Uloženo.";
+        document = ContentDocument.Empty;
+        captureKey++;
+        await Captured.InvokeAsync(result.Value);
+    }
+}

@@ -28,6 +28,19 @@ jobs:
         with:
           global-json-file: global.json
 
+      # Editor TipTap se sestavuje jako součást buildu (Cruma.Ui.Editor, plan.md N-8).
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/Cruma.Ui.Editor/editor/package-lock.json
+
+      - name: Editor packages and tests
+        working-directory: src/Cruma.Ui.Editor/editor
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
       - name: Restore
         run: dotnet restore Cruma.slnx
 

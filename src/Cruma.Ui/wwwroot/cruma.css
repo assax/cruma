@@ -1,0 +1,132 @@
+/*
+  Motivy Cruma (UI-006, ui-pattern.md §7): barvy jsou jen tokeny --cruma-*, definované jednou pro světlý
+  a jednou pro tmavý režim. Komponenty barvy nezapisují přímo. Barvy karet poznámek mají hodnotu pro oba
+  režimy (FR-2 akc. 5).
+*/
+.cruma-app,
+.cruma-app[data-theme="light"] {
+    --cruma-background: #f6f5f2;
+    --cruma-surface: #ffffff;
+    --cruma-surface-raised: #fbfaf7;
+    --cruma-text: #1f2328;
+    --cruma-text-muted: #5e6670;
+    --cruma-border: #d9d6cf;
+    --cruma-accent: #2f6fdd;
+    --cruma-accent-soft: #e3ecfb;
+    --cruma-on-accent: #ffffff;
+    --cruma-danger: #c0392b;
+    --cruma-warning-soft: #fff4d6;
+    --cruma-highlight: #fde68a;
+    --cruma-focus: #2f6fdd;
+
+    --cruma-card-yellow: #fff3bf;
+    --cruma-card-green: #d8f5d0;
+    --cruma-card-blue: #d6e8ff;
+    --cruma-card-pink: #fcdde8;
+    --cruma-card-purple: #e8defc;
+    --cruma-card-gray: #e7e7e4;
+}
+
+.cruma-app[data-theme="dark"] {
+    --cruma-background: #15171a;
+    --cruma-surface: #1e2125;
+    --cruma-surface-raised: #25292e;
+    --cruma-text: #e6e8eb;
+    --cruma-text-muted: #9aa3ad;
+    --cruma-border: #353a40;
+    --cruma-accent: #7aa7ff;
+    --cruma-accent-soft: #24324a;
+    --cruma-on-accent: #0d1117;
+    --cruma-danger: #ff7b72;
+    --cruma-warning-soft: #3b3220;
+    --cruma-highlight: #6b5b1f;
+    --cruma-focus: #7aa7ff;
+
+    --cruma-card-yellow: #4a4221;
+    --cruma-card-green: #243f27;
+    --cruma-card-blue: #1f3350;
+    --cruma-card-pink: #4a2533;
+    --cruma-card-purple: #352a4d;
+    --cruma-card-gray: #33363a;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.cruma-app {
+    min-height: 100vh;
+    background: var(--cruma-background);
+    color: var(--cruma-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    /* Na úzkém displeji nesmí vzniknout vodorovný posun celé stránky (FR-8 akc. 2). */
+    overflow-x: hidden;
+}
+
+.cruma-app a {
+    color: var(--cruma-accent);
+}
+
+.cruma-app button,
+.cruma-app input,
+.cruma-app select,
+.cruma-app textarea {
+    font: inherit;
+    color: var(--cruma-text);
+}
+
+.cruma-app input,
+.cruma-app select,
+.cruma-app textarea {
+    background: var(--cruma-surface);
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.55rem;
+    max-width: 100%;
+}
+
+.cruma-app :focus-visible {
+    outline: 2px solid var(--cruma-focus);
+    outline-offset: 2px;
+}
+
+.cruma-button {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.375rem;
+    background: var(--cruma-surface);
+    cursor: pointer;
+}
+
+.cruma-button.primary {
+    background: var(--cruma-accent);
+    border-color: var(--cruma-accent);
+    color: var(--cruma-on-accent);
+}
+
+.cruma-button.danger {
+    color: var(--cruma-danger);
+    border-color: var(--cruma-danger);
+}
+
+.cruma-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cruma-card-color-yellow { background: var(--cruma-card-yellow); }
+.cruma-card-color-green { background: var(--cruma-card-green); }
+.cruma-card-color-blue { background: var(--cruma-card-blue); }
+.cruma-card-color-pink { background: var(--cruma-card-pink); }
+.cruma-card-color-purple { background: var(--cruma-card-purple); }
+.cruma-card-color-gray { background: var(--cruma-card-gray); }

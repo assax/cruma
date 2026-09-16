@@ -1,0 +1,39 @@
+@* Náhled poznámky v přehledu: barva karty jako token tématu (UI-006), připnutí, konflikt. *@
+<article class="note-card @NoteColors.CssClass(Note.Metadata.Color)">
+    <a class="note-link" href="@($"notes/{Note.Id}")">
+        @if (Note.Metadata.IsPinned)
+        {
+            <span class="pin" title="Připnuto" aria-label="Připnuto">📌</span>
+        }
+        @if (!string.IsNullOrEmpty(Note.Metadata.Title))
+        {
+            <h3>@Note.Metadata.Title</h3>
+        }
+        <p class="preview">@Preview</p>
+        @if (Note.HasConflict)
+        {
+            <span class="conflict">Konflikt</span>
+        }
+    </a>
+    @if (ChildContent is not null)
+    {
+        <div class="actions">@ChildContent</div>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public NoteItem Note { get; set; } = null!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string Preview
+    {
+        get
+        {
+            var text = PlainTextExtractor.Extract(null, Note.Document);
+            return text.Length > 280 ? string.Concat(text.AsSpan(0, 280), "…") : (text.Length == 0 ? "(prázdná poznámka)" : text);
+        }
+    }
+}

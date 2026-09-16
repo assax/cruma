@@ -1,0 +1,71 @@
+@inject ISessionData Session
+@inject NavigationManager Navigation
+
+<section class="sign-in">
+    <h1>Přihlášení</h1>
+    @if (options is null)
+    {
+        <p>Načítání…</p>
+    }
+    else
+    {
+        @foreach (var provider in options.ExternalProviders)
+        {
+            @* target="_top": přihlášení musí projít serverem, ne směrováním Blazoru. *@
+            <a class="cruma-button primary" target="_top" href="@Session.ExternalSignInUrl(provider, "/")">Přihlásit účtem @ProviderName(provider)</a>
+        }
+        @if (options.DevelopmentSignIn)
+        {
+            <form class="dev" @onsubmit="SignInDevelopmentAsync">
+                <label>Vývojové přihlášení <input @bind="subject" placeholder="uživatel" /></label>
+                <button type="submit" class="cruma-button">Přihlásit</button>
+            </form>
+        }
+        @if (options.ExternalProviders.Count == 0 && !options.DevelopmentSignIn)
+        {
+            <p>Server zatím nemá nastavený žádný způsob přihlášení.</p>
+        }
+    }
+    @if (error is not null)
+    {
+        <p class="error" role="alert">@error</p>
+    }
+</section>
+
+@code {
+    private SignInOptions? options;
+    private string subject = "autor";
+    private string? error;
+
+    [Parameter]
+    public EventCallback<SessionInfo> SignedIn { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Session.GetSignInOptionsAsync();
+        if (result.IsSuccess)
+        {
+            options = result.Value;
+        }
+        else
+        {
+            error = ErrorText.For(result.Error!);
+            options = new SignInOptions([], false);
+        }
+    }
+
+    private async Task SignInDevelopmentAsync()
+    {
+        var result = await Session.SignInDevelopmentAsync(subject);
+        if (result is { IsSuccess: true, Value: { } session })
+        {
+            await SignedIn.InvokeAsync(session);
+        }
+        else
+        {
+            error = result.Error is null ? "Přihlášení se nezdařilo." : ErrorText.For(result.Error);
+        }
+    }
+
+    private static string ProviderName(string provider) => provider == "google" ? "Google" : provider;
+}

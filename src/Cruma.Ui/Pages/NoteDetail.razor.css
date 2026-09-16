@@ -1,0 +1,79 @@
+.note-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0 auto;
+    min-width: 0;
+}
+
+/* Šířka editoru (FR-8): desktop volí režim, tenký klient je responzivní. */
+.note-detail.width-standard { max-width: 46rem; }
+.note-detail.width-wide { max-width: 64rem; }
+.note-detail.width-full { max-width: none; }
+.note-detail.width-responsive { max-width: 46rem; }
+
+.toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.status {
+    color: var(--cruma-text-muted);
+    font-size: 0.9rem;
+    flex: 1 1 auto;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    width: 100%;
+}
+
+.properties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: flex-start;
+}
+
+fieldset {
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    min-width: 0;
+}
+
+.color {
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.35rem;
+}
+
+.notice {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--cruma-warning-soft);
+}
+
+.notice p {
+    margin: 0 0 0.35rem;
+}
+
+.state-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.muted {
+    color: var(--cruma-text-muted);
+}
+
+.error {
+    color: var(--cruma-danger);
+}

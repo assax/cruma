@@ -1,0 +1,75 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject CrumaUiState Ui
+@inject IConnectivity Connectivity
+@inject ISessionData Session
+
+<div class="cruma-app" data-theme="@Ui.Theme">
+    <header class="app-header">
+        <a class="brand" href="">Cruma</a>
+        @if (session is not null)
+        {
+            <nav class="app-nav" aria-label="Hlavní navigace">
+                <NavLink href="" Match="NavLinkMatch.All">Poznámky</NavLink>
+                <NavLink href="search">Hledat</NavLink>
+                <NavLink href="archive">Archiv</NavLink>
+                <NavLink href="trash">Koš</NavLink>
+                <NavLink href="settings">Nastavení</NavLink>
+            </nav>
+        }
+        <div class="app-status">
+            @if (!Connectivity.IsOnline)
+            {
+                <span class="offline" role="status">Offline</span>
+            }
+            <button type="button" class="cruma-button theme-toggle" @onclick="ToggleThemeAsync"
+                    aria-label="@(Ui.Theme == "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim")">
+                @(Ui.Theme == "dark" ? "☀" : "☾")
+            </button>
+        </div>
+    </header>
+    <main class="app-main">
+        @if (loading)
+        {
+            <p class="muted">Načítání…</p>
+        }
+        else if (session is null)
+        {
+            <SignIn SignedIn="OnSignedIn" />
+        }
+        else
+        {
+            <CascadingValue Value="session">
+                @Body
+            </CascadingValue>
+        }
+    </main>
+</div>
+
+@code {
+    private bool loading = true;
+    private SessionInfo? session;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Ui.Changed += OnChanged;
+        Connectivity.Changed += OnChanged;
+        await Ui.LoadAsync();
+
+        var result = await Session.GetSessionAsync();
+        session = result.IsSuccess ? result.Value : null;
+        loading = false;
+    }
+
+    private void OnSignedIn(SessionInfo signedIn) => session = signedIn;
+
+    private Task ToggleThemeAsync() => Ui.SetThemeAsync(Ui.Theme == "dark" ? "light" : "dark");
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Ui.Changed -= OnChanged;
+        Connectivity.Changed -= OnChanged;
+    }
+}

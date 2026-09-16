@@ -1,0 +1,343 @@
+@page "/notes/{Id:guid}"
+@implements IAsyncDisposable
+@inject INoteData Notes
+@inject ICatalogData Catalog
+@inject IConnectivity Connectivity
+@inject ICapabilities Capabilities
+@inject CrumaUiState Ui
+@inject NavigationManager Navigation
+
+@if (note is null)
+{
+    <p class="@(error is null ? "muted" : "error")" role="@(error is null ? null : "alert")">@(error ?? "Načítání…")</p>
+}
+else
+{
+    <div class="note-detail width-@(Capabilities.EditorWidthModes ? Ui.EditorWidth : "responsive")">
+        <div class="toolbar-row">
+            <a href="" class="back">← Zpět</a>
+            <span class="status" role="status">@status</span>
+            @if (Capabilities.EditorWidthModes)
+            {
+                <label class="width">
+                    Šířka
+                    <select value="@Ui.EditorWidth" @onchange="OnWidthChangedAsync">
+                        <option value="standard">Standardní</option>
+                        <option value="wide">Rozšířená</option>
+                        <option value="full">Plná</option>
+                    </select>
+                </label>
+            }
+        </div>
+
+        @* Název je volitelný – poznámka bez názvu se uloží i zobrazí (FR-2 akc. 2). *@
+        <input class="title" placeholder="Název (nepovinný)" aria-label="Název" @bind="title" @bind:after="ScheduleSave" disabled="@ReadOnly" />
+
+        @if (note.HasConflict)
+        {
+            <ConflictPanel Note="note" Resolved="OnResolved" />
+        }
+
+        @if (overwritten.Count > 0)
+        {
+            <div class="notice" role="status">
+                @foreach (var value in overwritten)
+                {
+                    <p>@FieldName(value.Field) se mezitím změnil(a) jinde. Platí „@value.WinningValue“, přepsaná hodnota „@value.OverwrittenValue“ zůstává v historii.</p>
+                }
+                <button type="button" class="cruma-button" @onclick="() => overwritten = []">Rozumím</button>
+            </div>
+        }
+
+        <CrumaEditor Document="document" DocumentChanged="OnDocumentChanged" DocumentKey="@editorKey" ReadOnly="false" />
+
+        <section class="properties" aria-label="Vlastnosti">
+            <label>
+                Kategorie
+                <select value="@categoryId" @onchange="OnCategoryChanged" disabled="@ReadOnly">
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </label>
+
+            <fieldset class="tags" disabled="@ReadOnly">
+                <legend>Štítky</legend>
+                @if (tags.Count == 0)
+                {
+                    <span class="muted">Štítky se zakládají v Nastavení.</span>
+                }
+                @foreach (var tag in tags)
+                {
+                    <label class="tag">
+                        <input type="checkbox" checked="@tagIds.Contains(tag.Id)" @onchange="e => ToggleTag(tag.Id, e)" /> #@tag.Name
+                    </label>
+                }
+            </fieldset>
+
+            <fieldset class="colors" disabled="@ReadOnly">
+                <legend>Barva karty</legend>
+                <label class="color"><input type="radio" name="color" checked="@(color is null)" @onchange="() => SetColor(null)" /> Bez barvy</label>
+                @foreach (var (key, label) in NoteColors.All)
+                {
+                    <label class="color @NoteColors.CssClass(key)"><input type="radio" name="color" checked="@(color == key)" @onchange="() => SetColor(key)" /> @label</label>
+                }
+            </fieldset>
+
+            <label class="pinned">
+                <input type="checkbox" @bind="pinned" @bind:after="ScheduleSave" disabled="@ReadOnly" /> Připnout
+            </label>
+        </section>
+
+        <section class="state-actions" aria-label="Stav poznámky">
+            @switch (note.Metadata.State)
+            {
+                case NoteState.Active:
+                    <button type="button" class="cruma-button" disabled="@ReadOnly" @onclick="() => ChangeStateAsync(NoteStateChange.Archive)">Archivovat</button>
+                    <button type="button" class="cruma-button" disabled="@ReadOnly" @onclick="() => ChangeStateAsync(NoteStateChange.Trash)">Do koše</button>
+                    break;
+                case NoteState.Archived:
+                    <button type="button" class="cruma-button" disabled="@ReadOnly" @onclick="() => ChangeStateAsync(NoteStateChange.Unarchive)">Vrátit z archivu</button>
+                    <button type="button" class="cruma-button" disabled="@ReadOnly" @onclick="() => ChangeStateAsync(NoteStateChange.Trash)">Do koše</button>
+                    break;
+                case NoteState.Trashed:
+                    <button type="button" class="cruma-button" disabled="@ReadOnly" @onclick="() => ChangeStateAsync(NoteStateChange.Restore)">Obnovit</button>
+                    <ConfirmButton Text="Smazat natrvalo" Question="Smazat natrvalo i s historií?" ConfirmText="Smazat" CssClass="danger"
+                                   Disabled="@ReadOnly" Confirmed="DeleteAsync" />
+                    break;
+            }
+        </section>
+    </div>
+}
+
+@code {
+    private NoteItem? note;
+    private IReadOnlyList<CategoryItem> categories = [];
+    private IReadOnlyList<TagItem> tags = [];
+    private string? title;
+    private Guid categoryId;
+    private HashSet<Guid> tagIds = [];
+    private string? color;
+    private bool pinned;
+    private ContentDocument document = ContentDocument.Empty;
+    private string editorKey = string.Empty;
+    private IReadOnlyList<OverwrittenValueInfo> overwritten = [];
+    private string? status;
+    private string? error;
+    private bool saving;
+    private bool saveAgain;
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    // Úprava existujících poznámek bez připojení není podporovaná (FR-30 akc. 5), kromě plně offline shellu.
+    private bool ReadOnly => !Connectivity.IsOnline && !Capabilities.WorksOffline;
+
+    private Guid loadedId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Connectivity.Changed += OnConnectivityChanged;
+        await Ui.LoadAsync();
+    }
+
+    // Stránka se znovu použije i při přechodu na jinou poznámku – data se načtou při každé změně Id.
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == loadedId)
+        {
+            return;
+        }
+
+        loadedId = Id;
+        note = null;
+        error = null;
+        status = null;
+        overwritten = [];
+        var loaded = await Notes.GetAsync(Id);
+        var categoriesResult = await Catalog.ListCategoriesAsync();
+        var tagsResult = await Catalog.ListTagsAsync();
+        categories = categoriesResult.IsSuccess ? categoriesResult.Value : [];
+        tags = tagsResult.IsSuccess ? tagsResult.Value : [];
+
+        if (!loaded.IsSuccess)
+        {
+            error = ErrorText.For(loaded.Error!);
+            return;
+        }
+
+        Apply(loaded.Value, reloadEditor: true);
+    }
+
+    private void Apply(NoteItem item, bool reloadEditor)
+    {
+        note = item;
+        title = item.Metadata.Title;
+        categoryId = item.Metadata.CategoryId;
+        tagIds = [.. item.Metadata.TagIds];
+        color = item.Metadata.Color;
+        pinned = item.Metadata.IsPinned;
+        if (reloadEditor)
+        {
+            document = item.Document;
+            editorKey = $"{item.Id}:{item.Version}:{item.UpdatedAtUtc.UtcTicks}";
+        }
+    }
+
+    private void OnDocumentChanged(ContentDocument changed)
+    {
+        document = changed;
+        ScheduleSave();
+    }
+
+    private void OnCategoryChanged(ChangeEventArgs args)
+    {
+        if (Guid.TryParse(args.Value?.ToString(), out var id))
+        {
+            categoryId = id;
+            ScheduleSave();
+        }
+    }
+
+    private void ToggleTag(Guid id, ChangeEventArgs args)
+    {
+        if (args.Value is true)
+        {
+            tagIds.Add(id);
+        }
+        else
+        {
+            tagIds.Remove(id);
+        }
+
+        ScheduleSave();
+    }
+
+    private void SetColor(string? key)
+    {
+        color = key;
+        ScheduleSave();
+    }
+
+    // Uložení jdou za sebou – nikdy dvě souběžně ze stejné verze; změna během ukládání se uloží hned po něm.
+    private void ScheduleSave()
+    {
+        if (saving)
+        {
+            saveAgain = true;
+            return;
+        }
+
+        saving = true;
+        _ = InvokeAsync(SaveLoopAsync);
+    }
+
+    private async Task SaveLoopAsync()
+    {
+        do
+        {
+            saveAgain = false;
+            status = "Ukládání…";
+            StateHasChanged();
+
+            var sent = document;
+            var changes = new NoteChanges(title, categoryId, [.. tagIds], color, pinned, sent);
+            var result = await Notes.SaveAsync(note!, changes);
+            if (!result.IsSuccess)
+            {
+                status = ErrorText.For(result.Error!);
+                break;
+            }
+
+            var saved = result.Value.Note;
+            if (result.Value.Outcome == "applied")
+            {
+                Apply(saved, reloadEditor: false);
+            }
+            else if (ReferenceEquals(document, sent))
+            {
+                // Sloučená nebo konfliktní verze se v editoru zobrazí celá (FR-28 akc. 1, 2).
+                Apply(saved, reloadEditor: true);
+            }
+            else
+            {
+                // Během ukládání uživatel psal dál: jeho další úpravy se převedou na sloučenou verzi, aby se neztratily (NFR-4).
+                var rebased = DocumentMerge.Merge(sent, saved.Document, document,
+                    new ConflictOrigin("web", saved.UpdatedAtUtc), new ConflictOrigin("web", DateTimeOffset.UtcNow)).Document;
+                Apply(saved with { Document = rebased }, reloadEditor: true);
+                saveAgain = true;
+            }
+
+            overwritten = result.Value.OverwrittenValues;
+            status = result.Value.Outcome switch
+            {
+                "merged" => "Uloženo a sloučeno se změnami odjinud.",
+                "conflict" => "Uloženo – vznikl konflikt, vyřešte ho níže.",
+                _ => "Uloženo.",
+            };
+        }
+        while (saveAgain);
+
+        saving = false;
+        StateHasChanged();
+    }
+
+    private void OnResolved(NoteSaveResult result)
+    {
+        Apply(result.Note, reloadEditor: true);
+        status = "Konflikt vyřešen.";
+    }
+
+    private async Task ChangeStateAsync(NoteStateChange change)
+    {
+        var result = await Notes.ChangeStateAsync(Id, change);
+        if (result.IsSuccess)
+        {
+            Apply(result.Value.Note, reloadEditor: false);
+            status = result.Value.Note.Metadata.State switch
+            {
+                NoteState.Archived => "Archivováno.",
+                NoteState.Trashed => "Přesunuto do koše.",
+                _ => "Obnoveno.",
+            };
+        }
+        else
+        {
+            status = ErrorText.For(result.Error!);
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        var result = await Notes.DeletePermanentlyAsync(Id);
+        if (result.IsSuccess)
+        {
+            Navigation.NavigateTo("trash");
+        }
+        else
+        {
+            status = ErrorText.For(result.Error!);
+        }
+    }
+
+    private Task OnWidthChangedAsync(ChangeEventArgs args) => Ui.SetEditorWidthAsync(args.Value?.ToString() ?? "standard");
+
+    private static string FieldName(string field) => field switch
+    {
+        "title" => "Název",
+        "category" => "Kategorie",
+        "color" => "Barva",
+        "pinned" => "Připnutí",
+        "state" => "Stav",
+        _ => field,
+    };
+
+    private void OnConnectivityChanged() => InvokeAsync(StateHasChanged);
+
+    public ValueTask DisposeAsync()
+    {
+        Connectivity.Changed -= OnConnectivityChanged;
+        return ValueTask.CompletedTask;
+    }
+}

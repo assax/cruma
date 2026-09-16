@@ -1,8 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
+  <PropertyGroup>
+    <!-- node_modules editoru nejsou součást projektu (rychlé vyhodnocení MSBuild). -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);editor\node_modules\**</DefaultItemExcludes>
+    <EditorBundle>wwwroot\cruma-editor.js</EditorBundle>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Cruma.Content\Cruma.Content.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="editor\**" />
+    <Content Remove="editor\**" />
+    <EditorSources Include="editor\src\**\*.ts;editor\package.json;editor\package-lock.json" />
+  </ItemGroup>
+
+  <!--
+    TipTap balík se sestavuje jako součást buildu a publikuje se jako static web asset
+    _content/Cruma.Ui.Editor/cruma-editor.js (T-34, plan.md N-8). Vyžaduje Node.js.
+  -->
+  <Target Name="RestoreEditorPackages" Condition="!Exists('editor\node_modules')">
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="editor" />
+  </Target>
+
+  <Target Name="BuildEditorBundle" BeforeTargets="BeforeBuild" DependsOnTargets="RestoreEditorPackages"
+          Inputs="@(EditorSources)" Outputs="$(EditorBundle)">
+    <Exec Command="npm run build" WorkingDirectory="editor" />
+  </Target>
+
+  <Target Name="IncludeEditorBundle" AfterTargets="BuildEditorBundle">
+    <ItemGroup>
+      <Content Include="$(EditorBundle)" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
 
 </Project>

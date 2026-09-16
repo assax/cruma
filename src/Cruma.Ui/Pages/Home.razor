@@ -1,3 +1,89 @@
 @page "/"
+@implements IDisposable
+@inject INoteData Notes
+@inject ICatalogData Catalog
+@inject IPendingNotes Pending
 
-<h1>Cruma</h1>
+<h1 class="visually-hidden">Poznámky</h1>
+
+<QuickCapture Captured="OnCapturedAsync" />
+
+@if (Pending.Items.Count > 0)
+{
+    <section class="pending" aria-label="Čeká na odeslání">
+        <h2>Čeká na odeslání</h2>
+        @foreach (var item in Pending.Items)
+        {
+            <p class="pending-item">⏳ @item.Preview</p>
+        }
+    </section>
+}
+
+<div class="filters">
+    <label>
+        Kategorie
+        <select value="@categoryId" @onchange="OnCategoryChangedAsync">
+            <option value="">Všechny</option>
+            @foreach (var category in categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+    </label>
+    @if (tags.Count > 0)
+    {
+        <div class="tag-filter" role="group" aria-label="Filtr podle štítku">
+            @foreach (var tag in tags)
+            {
+                <button type="button" class="chip @(tagId == tag.Id ? "is-active" : null)" aria-pressed="@(tagId == tag.Id)"
+                        @onclick="() => ToggleTagAsync(tag.Id)">#@tag.Name</button>
+            }
+        </div>
+    }
+</div>
+
+<NoteListView State="NoteState.Active" CategoryId="categoryId" TagId="tagId" ReloadKey="reloadKey" />
+
+@code {
+    private IReadOnlyList<CategoryItem> categories = [];
+    private IReadOnlyList<TagItem> tags = [];
+    private Guid? categoryId;
+    private Guid? tagId;
+    private int reloadKey;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Pending.Changed += OnPendingChanged;
+        var categoriesResult = await Catalog.ListCategoriesAsync();
+        var tagsResult = await Catalog.ListTagsAsync();
+        categories = categoriesResult.IsSuccess ? categoriesResult.Value : [];
+        tags = tagsResult.IsSuccess ? tagsResult.Value : [];
+    }
+
+    private Task OnCapturedAsync(NoteCreateResult result)
+    {
+        reloadKey++;
+        return Task.CompletedTask;
+    }
+
+    private Task OnCategoryChangedAsync(ChangeEventArgs args)
+    {
+        categoryId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+        return Task.CompletedTask;
+    }
+
+    // Filtr štítku zobrazí poznámky ze všech kategorií (FR-4 akc. 2).
+    private Task ToggleTagAsync(Guid id)
+    {
+        tagId = tagId == id ? null : id;
+        return Task.CompletedTask;
+    }
+
+    private void OnPendingChanged() => InvokeAsync(() =>
+    {
+        reloadKey++;
+        StateHasChanged();
+    });
+
+    public void Dispose() => Pending.Changed -= OnPendingChanged;
+}

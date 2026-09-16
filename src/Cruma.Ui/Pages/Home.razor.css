@@ -1,0 +1,51 @@
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tag-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.chip {
+    padding: 0.15rem 0.6rem;
+    border-radius: 1rem;
+    border: 1px solid var(--cruma-border);
+    background: var(--cruma-surface);
+    cursor: pointer;
+}
+
+.chip.is-active {
+    background: var(--cruma-accent-soft);
+    border-color: var(--cruma-accent);
+}
+
+.pending {
+    margin-bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--cruma-warning-soft);
+}
+
+.pending h2 {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+}
+
+.pending-item {
+    margin: 0.15rem 0;
+    overflow-wrap: anywhere;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}

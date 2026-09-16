@@ -1,0 +1,96 @@
+.cruma-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tool {
+    min-width: 2.25rem;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.375rem;
+    background: var(--cruma-surface);
+    color: var(--cruma-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.tool.is-active {
+    background: var(--cruma-accent-soft);
+    border-color: var(--cruma-accent);
+}
+
+.link-input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.link-input input {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.link-error {
+    color: var(--cruma-danger);
+}
+
+.content ::deep .ProseMirror {
+    min-height: 6rem;
+    padding: 0.75rem;
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.5rem;
+    background: var(--cruma-surface);
+    color: var(--cruma-text);
+    outline: none;
+    overflow-wrap: anywhere;
+}
+
+.content ::deep .ProseMirror:focus {
+    border-color: var(--cruma-accent);
+}
+
+.is-readonly .content ::deep .ProseMirror {
+    border-color: transparent;
+    padding: 0;
+    min-height: 0;
+}
+
+.content ::deep mark {
+    background: var(--cruma-highlight);
+    color: inherit;
+}
+
+.content ::deep a {
+    color: var(--cruma-accent);
+}
+
+.content ::deep ul[data-type="taskList"] {
+    list-style: none;
+    padding-left: 0.25rem;
+}
+
+.content ::deep ul[data-type="taskList"] li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.content ::deep ul[data-type="taskList"] li > div {
+    flex: 1;
+}
+
+.content ::deep [data-cruma-preserved] {
+    padding: 0.5rem;
+    border: 1px dashed var(--cruma-border);
+    border-radius: 0.375rem;
+    color: var(--cruma-text-muted);
+}

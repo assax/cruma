@@ -1,9 +1,12 @@
 @* Kořen směrování sdíleného UI; hostí ho Cruma.Desktop i Cruma.Web. *@
 <Router AppAssembly="typeof(Routes).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" />
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Cruma.Ui.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
     <NotFound>
-        <p role="alert">Stránka nenalezena.</p>
+        <LayoutView Layout="typeof(Cruma.Ui.Components.Layout.MainLayout)">
+            <p role="alert">Stránka nenalezena.</p>
+        </LayoutView>
     </NotFound>
 </Router>

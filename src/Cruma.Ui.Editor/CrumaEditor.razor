@@ -1,0 +1,236 @@
+@using System.Text.Json.Nodes
+@using Cruma.Content
+@using Microsoft.Extensions.Logging
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject ILogger<CrumaEditor> Logger
+
+@* Editor dokumentu poznámky. Jediné místo sdíleného UI, které smí použít IJSRuntime (UI-001 výjimka). *@
+<div class="cruma-editor @(ReadOnly ? "is-readonly" : null)">
+    @if (!ReadOnly && ShowToolbar)
+    {
+        <div class="toolbar" role="toolbar" aria-label="Formátování">
+            @foreach (var command in Commands)
+            {
+                <button type="button" class="tool @(active.Contains(command.Name) ? "is-active" : null)" title="@command.Title"
+                        aria-label="@command.Title" aria-pressed="@active.Contains(command.Name)"
+                        @onclick="() => ExecuteAsync(command.Name)">@command.Label</button>
+            }
+            <button type="button" class="tool @(active.Contains("link") ? "is-active" : null)" title="Odkaz" aria-label="Odkaz"
+                    @onclick="ToggleLinkInput">🔗</button>
+        </div>
+        @if (linkInputOpen)
+        {
+            <div class="link-input">
+                <input type="url" placeholder="https://…" @bind="linkHref" @bind:event="oninput" aria-label="Adresa odkazu"
+                       @onkeydown="OnLinkKeyDown" />
+                <button type="button" @onclick="ApplyLinkAsync">Použít</button>
+                <button type="button" @onclick="RemoveLinkAsync">Zrušit odkaz</button>
+                @if (linkError is not null)
+                {
+                    <span class="link-error" role="alert">@linkError</span>
+                }
+            </div>
+        }
+    }
+    <div @ref="host" class="content" data-placeholder="@Placeholder"></div>
+</div>
+
+@code {
+    private static readonly (string Name, string Label, string Title)[] Commands =
+    [
+        ("bold", "B", "Tučně"),
+        ("italic", "I", "Kurzíva"),
+        ("underline", "U", "Podtržení"),
+        ("strike", "S", "Přeškrtnutí"),
+        ("highlight", "▮", "Zvýraznění"),
+        ("heading1", "H1", "Nadpis 1"),
+        ("heading2", "H2", "Nadpis 2"),
+        ("heading3", "H3", "Nadpis 3"),
+        ("bulletList", "•", "Odrážkový seznam"),
+        ("orderedList", "1.", "Číslovaný seznam"),
+        ("taskList", "☑", "Checklist"),
+        ("undo", "↶", "Zpět"),
+        ("redo", "↷", "Znovu"),
+    ];
+
+    private ElementReference host;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<CrumaEditor>? self;
+    private int handle;
+    private string? loadedKey;
+    private HashSet<string> active = [];
+    private bool linkInputOpen;
+    private string linkHref = string.Empty;
+    private string? linkError;
+
+    /// <summary>Dokument schématu Cruma.Content (CNT-006).</summary>
+    [Parameter, EditorRequired]
+    public ContentDocument Document { get; set; } = ContentDocument.Empty;
+
+    /// <summary>Změněný dokument; hlásí se zpožděně po dopsání.</summary>
+    [Parameter]
+    public EventCallback<ContentDocument> DocumentChanged { get; set; }
+
+    /// <summary>Klíč obsahu – když se změní (jiná poznámka, sloučená verze), editor načte <see cref="Document"/> znovu.</summary>
+    [Parameter]
+    public string? DocumentKey { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public bool ShowToolbar { get; set; } = true;
+
+    [Parameter]
+    public bool AutoFocus { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    [Parameter]
+    public int DebounceMilliseconds { get; set; } = 400;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Cruma.Ui.Editor/cruma-editor.js");
+        self = DotNetObjectReference.Create(this);
+        handle = await module.InvokeAsync<int>("create", host, self, BlocksJson(Document), !ReadOnly, DebounceMilliseconds);
+        loadedKey = DocumentKey;
+        if (AutoFocus)
+        {
+            await module.InvokeVoidAsync("focus", handle);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (module is not null && DocumentKey != loadedKey)
+        {
+            loadedKey = DocumentKey;
+            await module.InvokeVoidAsync("setContent", handle, BlocksJson(Document));
+        }
+    }
+
+    /// <summary>Okamžitě odešle rozepsanou změnu (před uložením nebo odchodem).</summary>
+    public async Task FlushAsync()
+    {
+        if (module is not null)
+        {
+            await module.InvokeVoidAsync("flush", handle);
+        }
+    }
+
+    public async Task FocusAsync()
+    {
+        if (module is not null)
+        {
+            await module.InvokeVoidAsync("focus", handle);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnContentChanged(string blocksJson)
+    {
+        ContentDocument changed;
+        try
+        {
+            var blocks = JsonNode.Parse(blocksJson)?.AsArray() ?? [];
+            changed = Document.WithBlocks(blocks.Select(ContentBlock.FromJson));
+        }
+        catch (ContentFormatException exception)
+        {
+            // Neplatný výstup editoru nesmí přepsat uložený dokument; změna se zahodí a zaloguje (ERR-003).
+            Logger.LogWarning(exception, "Editor produced a document that does not match the schema");
+            return;
+        }
+
+        Document = changed;
+        await DocumentChanged.InvokeAsync(changed);
+    }
+
+    [JSInvokable]
+    public void OnFormatsChanged(string[] formats)
+    {
+        var next = formats.ToHashSet();
+        if (!next.SetEquals(active))
+        {
+            active = next;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ExecuteAsync(string command)
+    {
+        if (module is not null)
+        {
+            await module.InvokeAsync<bool>("execute", handle, command, null);
+        }
+    }
+
+    private void ToggleLinkInput()
+    {
+        linkInputOpen = !linkInputOpen;
+        linkError = null;
+    }
+
+    private async Task OnLinkKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await ApplyLinkAsync();
+        }
+    }
+
+    private async Task ApplyLinkAsync()
+    {
+        // Jen http, https a mailto (FR-7 akc. 7); kontroluje i editor.
+        if (!LinkPolicy.IsAllowed(linkHref))
+        {
+            linkError = "Povolené jsou jen odkazy http, https a mailto.";
+            return;
+        }
+
+        if (module is not null)
+        {
+            await module.InvokeAsync<bool>("execute", handle, "link", linkHref);
+        }
+
+        linkInputOpen = false;
+        linkHref = string.Empty;
+        linkError = null;
+    }
+
+    private async Task RemoveLinkAsync()
+    {
+        await ExecuteAsync("unlink");
+        linkInputOpen = false;
+    }
+
+    private static string BlocksJson(ContentDocument document) =>
+        (document.ToJson()["content"] ?? new JsonArray()).ToJsonString();
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (module is not null)
+            {
+                await module.InvokeVoidAsync("destroy", handle);
+                await module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Stránka se zavírá a JS už neběží – editor není co uvolnit.
+        }
+
+        self?.Dispose();
+    }
+}

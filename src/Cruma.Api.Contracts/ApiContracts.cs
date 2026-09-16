@@ -61,3 +61,6 @@ public sealed record RenameRequest(string Name);
 public sealed record CurrentUserDto(Guid UserId);
 
 public sealed record DevelopmentSignInRequest(string Subject);
+
+/// <summary>Dostupné způsoby přihlášení: externí poskytovatelé a vývojové přihlášení (jen Development).</summary>
+public sealed record SignInProvidersDto(IReadOnlyList<string> ExternalProviders, bool DevelopmentSignIn);

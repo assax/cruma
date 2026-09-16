@@ -1,0 +1,155 @@
+@page "/settings"
+@inject ICatalogData Catalog
+@inject ISessionData Session
+@inject CrumaUiState Ui
+@inject IConnectivity Connectivity
+@inject NavigationManager Navigation
+
+<h1>Nastavení</h1>
+
+<section class="block" aria-labelledby="theme-heading">
+    <h2 id="theme-heading">Vzhled</h2>
+    @* Světlý a tmavý režim (FR-34 akc. 1). *@
+    <label><input type="radio" name="theme" checked="@(Ui.Theme == "light")" @onchange='() => Ui.SetThemeAsync("light")' /> Světlý</label>
+    <label><input type="radio" name="theme" checked="@(Ui.Theme == "dark")" @onchange='() => Ui.SetThemeAsync("dark")' /> Tmavý</label>
+</section>
+
+<section class="block" aria-labelledby="categories-heading">
+    <h2 id="categories-heading">Kategorie</h2>
+    <p class="muted">Kategorie jsou jednoúrovňové. Poznámky smazané kategorie přejdou do výchozí; výchozí kategorii smazat nejde.</p>
+    <ul class="items">
+        @foreach (var category in categories)
+        {
+            <li>
+                @if (renaming == category.Id)
+                {
+                    <input @bind="renameText" aria-label="Nový název kategorie" />
+                    <button type="button" class="cruma-button primary" @onclick="() => RenameCategoryAsync(category.Id)">Uložit</button>
+                    <button type="button" class="cruma-button" @onclick="() => renaming = null">Zrušit</button>
+                }
+                else
+                {
+                    <span class="name">@category.Name @(category.IsDefault ? "(výchozí)" : null)</span>
+                    <button type="button" class="cruma-button" disabled="@Offline" @onclick="() => StartRename(category.Id, category.Name)">Přejmenovat</button>
+                    @if (!category.IsDefault)
+                    {
+                        <ConfirmButton Text="Smazat" Question="Smazat kategorii? Poznámky přejdou do výchozí." ConfirmText="Smazat" CssClass="danger"
+                                       Disabled="@Offline" Confirmed="() => DeleteCategoryAsync(category.Id)" />
+                    }
+                }
+            </li>
+        }
+    </ul>
+    <form class="add" @onsubmit="CreateCategoryAsync">
+        <input @bind="newCategory" placeholder="Nová kategorie" aria-label="Nová kategorie" />
+        <button type="submit" class="cruma-button" disabled="@Offline">Přidat</button>
+    </form>
+</section>
+
+<section class="block" aria-labelledby="tags-heading">
+    <h2 id="tags-heading">Štítky</h2>
+    <p class="muted">Smazání štítku ho odebere z poznámek, poznámky zůstanou.</p>
+    <ul class="items">
+        @foreach (var tag in tags)
+        {
+            <li>
+                @if (renaming == tag.Id)
+                {
+                    <input @bind="renameText" aria-label="Nový název štítku" />
+                    <button type="button" class="cruma-button primary" @onclick="() => RenameTagAsync(tag.Id)">Uložit</button>
+                    <button type="button" class="cruma-button" @onclick="() => renaming = null">Zrušit</button>
+                }
+                else
+                {
+                    <span class="name">#@tag.Name</span>
+                    <button type="button" class="cruma-button" disabled="@Offline" @onclick="() => StartRename(tag.Id, tag.Name)">Přejmenovat</button>
+                    <ConfirmButton Text="Smazat" Question="Smazat štítek?" ConfirmText="Smazat" CssClass="danger"
+                                   Disabled="@Offline" Confirmed="() => DeleteTagAsync(tag.Id)" />
+                }
+            </li>
+        }
+    </ul>
+    <form class="add" @onsubmit="CreateTagAsync">
+        <input @bind="newTag" placeholder="Nový štítek" aria-label="Nový štítek" />
+        <button type="submit" class="cruma-button" disabled="@Offline">Přidat</button>
+    </form>
+</section>
+
+@if (error is not null)
+{
+    <p class="error" role="alert">@error</p>
+}
+
+<section class="block">
+    <button type="button" class="cruma-button" @onclick="SignOutAsync">Odhlásit se</button>
+</section>
+
+@code {
+    private IReadOnlyList<CategoryItem> categories = [];
+    private IReadOnlyList<TagItem> tags = [];
+    private string newCategory = string.Empty;
+    private string newTag = string.Empty;
+    private Guid? renaming;
+    private string renameText = string.Empty;
+    private string? error;
+
+    private bool Offline => !Connectivity.IsOnline;
+
+    protected override Task OnInitializedAsync() => ReloadAsync();
+
+    private async Task ReloadAsync()
+    {
+        var categoriesResult = await Catalog.ListCategoriesAsync();
+        var tagsResult = await Catalog.ListTagsAsync();
+        categories = categoriesResult.IsSuccess ? categoriesResult.Value : categories;
+        tags = tagsResult.IsSuccess ? tagsResult.Value : tags;
+    }
+
+    private void StartRename(Guid id, string name)
+    {
+        renaming = id;
+        renameText = name;
+    }
+
+    private Task CreateCategoryAsync() => RunAsync(() => Catalog.CreateCategoryAsync(newCategory), () => newCategory = string.Empty);
+
+    private Task RenameCategoryAsync(Guid id) => RunAsync(() => Catalog.RenameCategoryAsync(id, renameText), () => renaming = null);
+
+    private Task DeleteCategoryAsync(Guid id) => RunAsync(() => Catalog.DeleteCategoryAsync(id), () => { });
+
+    private Task CreateTagAsync() => RunAsync(() => Catalog.CreateTagAsync(newTag), () => newTag = string.Empty);
+
+    private Task RenameTagAsync(Guid id) => RunAsync(() => Catalog.RenameTagAsync(id, renameText), () => renaming = null);
+
+    private Task DeleteTagAsync(Guid id) => RunAsync(() => Catalog.DeleteTagAsync(id), () => { });
+
+    private async Task RunAsync(Func<Task<DataResult>> operation, Action onSuccess)
+    {
+        var result = await operation();
+        error = result.IsSuccess ? null : ErrorText.For(result.Error!);
+        if (result.IsSuccess)
+        {
+            onSuccess();
+        }
+
+        await ReloadAsync();
+    }
+
+    private async Task RunAsync<T>(Func<Task<DataResult<T>>> operation, Action onSuccess)
+    {
+        var result = await operation();
+        error = result.IsSuccess ? null : ErrorText.For(result.Error!);
+        if (result.IsSuccess)
+        {
+            onSuccess();
+        }
+
+        await ReloadAsync();
+    }
+
+    private async Task SignOutAsync()
+    {
+        await Session.SignOutAsync();
+        Navigation.NavigateTo(Navigation.BaseUri, forceLoad: true);
+    }
+}

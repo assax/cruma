@@ -1,0 +1,56 @@
+@page "/search"
+@inject ISearchData SearchData
+@inject IConnectivity Connectivity
+
+<h1>Hledat</h1>
+
+@* Vyhledávání bez ohledu na velikost písmen a diakritiku podle začátku slov (FR-24), filtr stavu (akc. 6). *@
+<form class="search-form" role="search" @onsubmit="SearchAsync">
+    <input type="search" @bind="query" @bind:event="oninput" placeholder="Hledaný text" aria-label="Hledaný text" />
+    <select @bind="stateFilter" aria-label="Stav">
+        <option value="">Všechny stavy</option>
+        <option value="@NoteState.Active">Aktivní</option>
+        <option value="@NoteState.Archived">Archiv</option>
+        <option value="@NoteState.Trashed">Koš</option>
+    </select>
+    <button type="submit" class="cruma-button primary" disabled="@(!Connectivity.IsOnline)">Hledat</button>
+</form>
+
+@if (error is not null)
+{
+    <p class="error" role="alert">@error</p>
+}
+else if (result is not null)
+{
+    <p class="muted" role="status">Nalezeno: @result.TotalCount</p>
+    <div class="results">
+        @foreach (var note in result.Items)
+        {
+            <NoteCard Note="note">
+                <span class="state">@StateLabel(note.Metadata.State)</span>
+            </NoteCard>
+        }
+    </div>
+}
+
+@code {
+    private string query = string.Empty;
+    private string stateFilter = string.Empty;
+    private PageResult<NoteItem>? result;
+    private string? error;
+
+    private async Task SearchAsync()
+    {
+        NoteState? state = Enum.TryParse<NoteState>(stateFilter, out var parsed) ? parsed : null;
+        var found = await SearchData.SearchAsync(query, state, 1, 100);
+        result = found.IsSuccess ? found.Value : null;
+        error = found.IsSuccess ? null : ErrorText.For(found.Error!);
+    }
+
+    private static string StateLabel(NoteState state) => state switch
+    {
+        NoteState.Archived => "Archiv",
+        NoteState.Trashed => "Koš",
+        _ => "Aktivní",
+    };
+}

@@ -1,0 +1,47 @@
+.block {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.items li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.name {
+    flex: 1 1 10rem;
+    overflow-wrap: anywhere;
+}
+
+.add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.muted {
+    color: var(--cruma-text-muted);
+    margin: 0;
+}
+
+.error {
+    color: var(--cruma-danger);
+}

@@ -1,0 +1,135 @@
+@implements IDisposable
+@inject INoteData Notes
+@inject IConnectivity Connectivity
+
+@*
+    Seznam poznámek v jednom stavu (FR-5): přehled aktivních (připnuté první – řadí server, FR-2 akc. 3), archiv, koš.
+    V koši jde obnovit a trvale smazat s potvrzením (FR-5 akc. 2, 3).
+*@
+@if (error is not null)
+{
+    <p class="error" role="alert">@error</p>
+}
+
+@if (page is null)
+{
+    <p class="muted">Načítání…</p>
+}
+else if (page.Items.Count == 0)
+{
+    <p class="muted">@EmptyText</p>
+}
+else
+{
+    <div class="note-grid">
+        @foreach (var note in page.Items)
+        {
+            <NoteCard Note="note">
+                @if (State == NoteState.Archived)
+                {
+                    <button type="button" class="cruma-button" disabled="@(!Connectivity.IsOnline)" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Unarchive)">Vrátit z archivu</button>
+                }
+                else if (State == NoteState.Trashed)
+                {
+                    <button type="button" class="cruma-button" disabled="@(!Connectivity.IsOnline)" @onclick="() => ChangeAsync(note.Id, NoteStateChange.Restore)">Obnovit</button>
+                    <ConfirmButton Text="Smazat natrvalo" Question="Smazat natrvalo i s historií?" ConfirmText="Smazat" CssClass="danger"
+                                   Disabled="@(!Connectivity.IsOnline)" Confirmed="() => DeleteAsync(note.Id)" />
+                }
+            </NoteCard>
+        }
+    </div>
+    @if (page.TotalCount > PageSize)
+    {
+        <nav class="pager" aria-label="Stránky">
+            <button type="button" class="cruma-button" disabled="@(pageNumber <= 1)" @onclick="() => GoToAsync(pageNumber - 1)">Předchozí</button>
+            <span>@pageNumber / @PageCount</span>
+            <button type="button" class="cruma-button" disabled="@(pageNumber >= PageCount)" @onclick="() => GoToAsync(pageNumber + 1)">Další</button>
+        </nav>
+    }
+}
+
+@code {
+    private const int PageSize = 50;
+    private PageResult<NoteItem>? page;
+    private int pageNumber = 1;
+    private string? error;
+    private (NoteState, Guid?, Guid?, int)? loadedFor;
+
+    [Parameter, EditorRequired]
+    public NoteState State { get; set; }
+
+    [Parameter]
+    public Guid? CategoryId { get; set; }
+
+    [Parameter]
+    public Guid? TagId { get; set; }
+
+    /// <summary>Změna vynutí nové načtení (např. po rychlém zachycení).</summary>
+    [Parameter]
+    public int ReloadKey { get; set; }
+
+    [Parameter]
+    public string EmptyText { get; set; } = "Zatím tu nic není.";
+
+    private int PageCount => page is null ? 1 : Math.Max(1, (int)Math.Ceiling(page.TotalCount / (double)PageSize));
+
+    protected override void OnInitialized() => Connectivity.Changed += OnConnectivityChanged;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var key = (State, CategoryId, TagId, ReloadKey);
+        if (key != loadedFor)
+        {
+            loadedFor = key;
+            pageNumber = 1;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        var result = await Notes.ListAsync(State, CategoryId, TagId, pageNumber, PageSize);
+        if (result.IsSuccess)
+        {
+            page = result.Value;
+            error = null;
+        }
+        else
+        {
+            page ??= new PageResult<NoteItem>([], 0);
+            error = ErrorText.For(result.Error!);
+        }
+    }
+
+    private async Task GoToAsync(int number)
+    {
+        pageNumber = number;
+        await LoadAsync();
+    }
+
+    private async Task ChangeAsync(Guid id, NoteStateChange change)
+    {
+        var result = await Notes.ChangeStateAsync(id, change);
+        error = result.IsSuccess ? null : ErrorText.For(result.Error!);
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        var result = await Notes.DeletePermanentlyAsync(id);
+        error = result.IsSuccess ? null : ErrorText.For(result.Error!);
+        await LoadAsync();
+    }
+
+    private void OnConnectivityChanged() => InvokeAsync(async () =>
+    {
+        if (Connectivity.IsOnline)
+        {
+            await LoadAsync();
+        }
+
+        StateHasChanged();
+    });
+
+    public void Dispose() => Connectivity.Changed -= OnConnectivityChanged;
+}

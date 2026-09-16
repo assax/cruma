@@ -85,6 +85,9 @@ Kostra řešení existuje (etapa E-1). Platí:
 - Architektonický test (`tests/Cruma.Architecture.Tests`) čte reference přímo z `solution-structure-template.md`
   §3 – nepovolenou referenci neobcházej, oprav návrh. Nový projekt = řádek v šabloně ve stejné změně (STR-001).
 - Balíčky jen z nuget.org (`nuget.config` v kořeni), verze jen v `Directory.Packages.props`.
+- Build vyžaduje **Node.js**: `Cruma.Ui.Editor` před buildem spustí `npm ci` (když chybí `node_modules`) a esbuild.
+  Testy editoru: `npm test` ve `src/Cruma.Ui.Editor/editor`. Sdílené UI nesmí použít IJSRuntime ani HttpClient
+  (hlídá architektonický test); JS interop smí jen `Cruma.Ui.Editor` a shell.
 - Desktop v Debug buildu má data v `%LOCALAPPDATA%\Cruma\dev\` a v titulku „(dev)“ (PER-006).
 - Logování přes `ILogger` s NLog, výchozí úroveň Information; obsah poznámek, dotazy, tokeny a tajné údaje se
   nikdy nelogují (LOG-002).

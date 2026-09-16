@@ -1,0 +1,51 @@
+.note-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--cruma-border);
+    border-radius: 0.6rem;
+    background: var(--cruma-surface);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.note-link {
+    display: block;
+    padding: 0.75rem;
+    color: var(--cruma-text) !important;
+    text-decoration: none;
+    flex: 1;
+}
+
+h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.preview {
+    margin: 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--cruma-text);
+}
+
+.pin {
+    float: right;
+}
+
+.conflict {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 1rem;
+    border: 1px solid var(--cruma-danger);
+    color: var(--cruma-danger);
+    font-size: 0.8rem;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0 0.75rem 0.75rem;
+}

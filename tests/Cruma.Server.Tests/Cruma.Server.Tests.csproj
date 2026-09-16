@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cruma.Server\Cruma.Server.csproj" />
+    <ProjectReference Include="..\..\src\Cruma.Api.Client\Cruma.Api.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Npgsql" />

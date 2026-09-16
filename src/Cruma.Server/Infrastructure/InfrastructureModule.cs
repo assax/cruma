@@ -17,6 +17,7 @@ public static class InfrastructureModule
     {
         "/health",
         "/auth/sign-in/{provider}",
+        "/auth/providers",
         "/auth/callback",
         "/auth/dev/sign-in",
         "{*path:nonfile}",

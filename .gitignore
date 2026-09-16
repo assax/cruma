@@ -36,3 +36,6 @@ appsettings.*.local.json
 # OS
 Thumbs.db
 .DS_Store
+
+# Sestavený balík editoru (vzniká při buildu)
+src/Cruma.Ui.Editor/wwwroot/cruma-editor.js

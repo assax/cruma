@@ -1,0 +1,58 @@
+.app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--cruma-surface);
+    border-bottom: 1px solid var(--cruma-border);
+}
+
+.brand {
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
+    color: var(--cruma-text) !important;
+}
+
+.app-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    flex: 1 1 auto;
+}
+
+.app-nav ::deep a {
+    text-decoration: none;
+    color: var(--cruma-text-muted);
+    padding: 0.2rem 0;
+}
+
+.app-nav ::deep a.active {
+    color: var(--cruma-text);
+    border-bottom: 2px solid var(--cruma-accent);
+}
+
+.app-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.offline {
+    padding: 0.15rem 0.5rem;
+    border-radius: 1rem;
+    background: var(--cruma-warning-soft);
+    font-size: 0.85rem;
+}
+
+.app-main {
+    padding: 1rem;
+    max-width: 72rem;
+    margin: 0 auto;
+}
+
+.muted {
+    color: var(--cruma-text-muted);
+}

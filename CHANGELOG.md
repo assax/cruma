@@ -7,6 +7,17 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
 
 ## [Nevydáno]
 
+### Přidáno
+
+- **Webová aplikace Cruma (PWA).** Poznámky v prohlížeči i v telefonu: rychlé zachycení bez jakéhokoli dialogu,
+  editor s nadpisy, tučným písmem, kurzívou, podtržením, přeškrtnutím, seznamy, checklistem, odkazy a zvýrazněním,
+  přehled s připnutými poznámkami a filtrem štítků, archiv, koš s obnovením a trvalým smazáním, hledání bez ohledu
+  na diakritiku, kategorie a štítky, světlý a tmavý režim.
+- **Souběžné úpravy bez ztráty.** Změny téže poznámky z více zařízení se sloučí; když se stejný odstavec změní na
+  dvou místech, aplikace ukáže obě verze a nechá vybrat nebo upravit.
+- **Poznámka i bez připojení.** Bez sítě jde napsat novou poznámku – počká ve frontě a po obnovení spojení se odešle
+  sama; ostatní akce jsou do té doby vypnuté a aplikace ukazuje stav Offline.
+
 ### Vývojářské
 
 - **Architektura a plán prvního inkrementu.** Koncept, architektura celého systému (`docs/arch/`), architecture
@@ -36,5 +47,8 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
   synchronizační protokol pro desktop (handshake, push s deduplikací, pull podle kurzoru), audit bez obsahu
   a append-only, cookie session a vývojové přihlášení – aby web i desktop měly proti čemu běžet. Přihlášení
   Googlem se zapne po zadání OAuth údajů.
+- **Sdílené UI, editor a API klient (etapa E-4).** `Cruma.Ui` s rozhraními služeb a schopnostmi shellu,
+  `Cruma.Ui.Editor` s TipTap balíkem sestavovaným v buildu (vyžaduje Node.js) a vlastním rozšířením identifikátorů
+  bloků, typovaný `Cruma.Api.Client`, bUnit a vitest testy – aby desktop v E-5 použil stejné komponenty.
 - **Izolace uživatelů a konformní sada vyhledávání.** Každý endpoint i synchronizace ověřeně nevydá data jiného
   uživatele; vyhledávání nad PostgreSQL vrací stejné výsledky jako referenční vyhodnocení.
