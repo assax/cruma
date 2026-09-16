@@ -38,6 +38,13 @@ v `CHANGES.md`, rozcestník v `README.md`.
 - Připomínky se sbírají do `CHANGES.md` s rozborem a návrhem; zapracovávají se až na pokyn
   **„zapracuj změny“**.
 
+## Větve
+
+- **`dev`** je výchozí větev a probíhá na ní veškerý vývoj; commituje se sem.
+- **`main`** je větev vydaných verzí. Slučuje se do ní jen vydání a jen tam se dávají tagy verzí.
+- Sprint pracuje na `dev`; větev pro jednotlivý sprint se nezakládá, pokud to autor nevyžádá.
+- **Nepushovat bez výslovného pokynu autora** – ani na `dev`.
+
 ## CHANGELOG a vydání
 
 - **Každá změna, kterou uživatel uvidí, jde do `CHANGELOG.md` pod `## [Nevydáno]`** – ve stejném commitu jako
