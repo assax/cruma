@@ -1,0 +1,38 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+TestResults/
+*.binlog
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# JS tooling (editor bundle)
+node_modules/
+.npm/
+
+# Local databases and logs
+*.db
+*.db-shm
+*.db-wal
+logs/
+
+# Secrets — never commit (SEC-006)
+.env
+.env.*
+!.env.example
+secrets/
+*.pfx
+*.pem
+appsettings.*.local.json
+
+# OS
+Thumbs.db
+.DS_Store
