@@ -149,6 +149,7 @@ Any reference not listed is forbidden (STR-001, DEP-001..DEP-004).
 | `Cruma.Desktop.Storage.Tests` | local storage, pending change log | integration (SQLite file) |
 | `Cruma.Sync.Client.Tests` | sync engine against a test server | integration |
 | `Cruma.Ui.Tests` | components with logic (bUnit) | unit |
+| `Cruma.Architecture.Tests` | allowed references (§3), projects listed in this template, shared logic packages, NLog only in composition roots (plan N-5; DEP-001..DEP-004, STR-001, LOG-003) | architecture |
 
 ---
 

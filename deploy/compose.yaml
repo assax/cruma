@@ -1,0 +1,34 @@
+# Cruma – definice kontejnerů (deployment-pattern.md §2).
+# Musí běžet beze změn v Podmanu i Dockeru (OPS-001): žádné funkce specifické pro jeden nástroj.
+#
+# Vývoj (jen PostgreSQL):
+#   podman compose -f deploy/compose.yaml --profile dev up -d
+#   docker compose -f deploy/compose.yaml --profile dev up -d
+# Heslo se čte z deploy/.env (vzor deploy/.env.example; .env se necommituje – SEC-006).
+#
+# Produkční služby (proxy, server, migrate, db, backup) přibudou v etapě E-6.
+
+name: cruma
+
+services:
+  db-dev:
+    # Pevná verze image (OPS-004); stejnou verzi používají testy přes Testcontainers.
+    image: docker.io/library/postgres:18.6-alpine
+    profiles: ["dev"]
+    environment:
+      POSTGRES_DB: cruma
+      POSTGRES_USER: cruma
+      POSTGRES_PASSWORD: ${CRUMA_DEV_DB_PASSWORD:?CRUMA_DEV_DB_PASSWORD musí být nastaveno v deploy/.env}
+    ports:
+      # Jen lokální rozhraní vývojového počítače.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-dev-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cruma -d cruma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-dev-data:

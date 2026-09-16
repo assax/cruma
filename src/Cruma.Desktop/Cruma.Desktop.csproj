@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Ui\Cruma.Ui.csproj" />
+    <ProjectReference Include="..\Cruma.Desktop.Storage\Cruma.Desktop.Storage.csproj" />
+    <ProjectReference Include="..\Cruma.Sync.Client\Cruma.Sync.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="NLog.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="nlog.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

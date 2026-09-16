@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cruma.Kanban\Cruma.Kanban.csproj" />
+  </ItemGroup>
+
+</Project>

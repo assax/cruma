@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Content\Cruma.Content.csproj" />
+    <ProjectReference Include="..\Cruma.Notes\Cruma.Notes.csproj" />
+    <ProjectReference Include="..\Cruma.Kanban\Cruma.Kanban.csproj" />
+  </ItemGroup>
+
+</Project>

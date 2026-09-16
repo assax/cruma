@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Ui\Cruma.Ui.csproj" />
+    <ProjectReference Include="..\Cruma.Api.Client\Cruma.Api.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
+    <PackageReference Include="NLog.Extensions.Logging" />
+  </ItemGroup>
+
+</Project>

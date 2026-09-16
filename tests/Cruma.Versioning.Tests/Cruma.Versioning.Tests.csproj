@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cruma.Versioning\Cruma.Versioning.csproj" />
+  </ItemGroup>
+
+</Project>

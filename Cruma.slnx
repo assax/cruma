@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Cruma.Api.Client/Cruma.Api.Client.csproj" />
+    <Project Path="src/Cruma.Api.Contracts/Cruma.Api.Contracts.csproj" />
+    <Project Path="src/Cruma.Blobs/Cruma.Blobs.csproj" />
+    <Project Path="src/Cruma.Content/Cruma.Content.csproj" />
+    <Project Path="src/Cruma.Desktop.Storage/Cruma.Desktop.Storage.csproj" />
+    <Project Path="src/Cruma.Desktop/Cruma.Desktop.csproj" />
+    <Project Path="src/Cruma.Kanban/Cruma.Kanban.csproj" />
+    <Project Path="src/Cruma.Notes/Cruma.Notes.csproj" />
+    <Project Path="src/Cruma.Search/Cruma.Search.csproj" />
+    <Project Path="src/Cruma.Server/Cruma.Server.csproj" />
+    <Project Path="src/Cruma.Sync.Client/Cruma.Sync.Client.csproj" />
+    <Project Path="src/Cruma.Sync/Cruma.Sync.csproj" />
+    <Project Path="src/Cruma.Ui.Editor/Cruma.Ui.Editor.csproj" />
+    <Project Path="src/Cruma.Ui/Cruma.Ui.csproj" />
+    <Project Path="src/Cruma.Versioning/Cruma.Versioning.csproj" />
+    <Project Path="src/Cruma.Web/Cruma.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Cruma.Architecture.Tests/Cruma.Architecture.Tests.csproj" />
+    <Project Path="tests/Cruma.Content.Tests/Cruma.Content.Tests.csproj" />
+    <Project Path="tests/Cruma.Desktop.Storage.Tests/Cruma.Desktop.Storage.Tests.csproj" />
+    <Project Path="tests/Cruma.Kanban.Tests/Cruma.Kanban.Tests.csproj" />
+    <Project Path="tests/Cruma.Notes.Tests/Cruma.Notes.Tests.csproj" />
+    <Project Path="tests/Cruma.Search.Conformance.Tests/Cruma.Search.Conformance.Tests.csproj" />
+    <Project Path="tests/Cruma.Search.Tests/Cruma.Search.Tests.csproj" />
+    <Project Path="tests/Cruma.Server.Tests/Cruma.Server.Tests.csproj" />
+    <Project Path="tests/Cruma.Sync.Client.Tests/Cruma.Sync.Client.Tests.csproj" />
+    <Project Path="tests/Cruma.Ui.Tests/Cruma.Ui.Tests.csproj" />
+    <Project Path="tests/Cruma.Versioning.Tests/Cruma.Versioning.Tests.csproj" />
+  </Folder>
+</Solution>

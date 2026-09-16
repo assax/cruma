@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cruma.Search\Cruma.Search.csproj" />
+    <ProjectReference Include="..\..\src\Cruma.Desktop.Storage\Cruma.Desktop.Storage.csproj" />
+    <ProjectReference Include="..\..\src\Cruma.Server\Cruma.Server.csproj" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+</Project>

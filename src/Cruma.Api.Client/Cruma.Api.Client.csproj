@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Api.Contracts\Cruma.Api.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

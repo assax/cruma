@@ -1,0 +1,9 @@
+@* Kořen směrování sdíleného UI; hostí ho Cruma.Desktop i Cruma.Web. *@
+<Router AppAssembly="typeof(Routes).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" />
+    </Found>
+    <NotFound>
+        <p role="alert">Stránka nenalezena.</p>
+    </NotFound>
+</Router>

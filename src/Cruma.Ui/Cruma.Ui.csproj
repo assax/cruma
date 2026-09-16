@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Notes\Cruma.Notes.csproj" />
+    <ProjectReference Include="..\Cruma.Kanban\Cruma.Kanban.csproj" />
+    <ProjectReference Include="..\Cruma.Content\Cruma.Content.csproj" />
+    <ProjectReference Include="..\Cruma.Versioning\Cruma.Versioning.csproj" />
+    <ProjectReference Include="..\Cruma.Search\Cruma.Search.csproj" />
+    <ProjectReference Include="..\Cruma.Sync\Cruma.Sync.csproj" />
+    <ProjectReference Include="..\Cruma.Blobs\Cruma.Blobs.csproj" />
+    <ProjectReference Include="..\Cruma.Api.Contracts\Cruma.Api.Contracts.csproj" />
+    <ProjectReference Include="..\Cruma.Ui.Editor\Cruma.Ui.Editor.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+</Project>

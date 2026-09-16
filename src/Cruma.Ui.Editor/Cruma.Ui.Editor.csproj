@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cruma.Content\Cruma.Content.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+</Project>

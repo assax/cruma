@@ -56,7 +56,7 @@ v `CHANGES.md`, rozcestník v `README.md`.
 
 ## Stavba a ověřování
 
-Kód zatím neexistuje; vzniká úkoly T-2 a T-3. Po nich platí:
+Kostra řešení existuje (etapa E-1). Platí:
 
 - Build: `dotnet build Cruma.slnx`. Testy: `dotnet test Cruma.slnx` (NUnit, Moq, bUnit; integrační testy
   s PostgreSQL přes Testcontainers).
@@ -64,7 +64,13 @@ Kód zatím neexistuje; vzniká úkoly T-2 a T-3. Po nich platí:
   připojují přes socket Podmanu.
 - Nová funkce = nový test. Scénáře slučování, konformní testy vyhledávání a testy izolace uživatelů jsou
   povinné (`shared/testing-strategy.md`).
-- Architektonický test hlídá povolené reference mezi projekty – nepovolenou referenci neobcházej, oprav návrh.
+- Vývojová databáze: `deploy/.env` podle `deploy/.env.example` (necommituje se), pak
+  `podman compose -f deploy/compose.yaml --profile dev up -d`. Testcontainers nad Podman machine fungují bez
+  nastavení; kdyby Docker API nenašly, nastavit `DOCKER_HOST=npipe://./pipe/podman-machine-default`.
+- Architektonický test (`tests/Cruma.Architecture.Tests`) čte reference přímo z `solution-structure-template.md`
+  §3 – nepovolenou referenci neobcházej, oprav návrh. Nový projekt = řádek v šabloně ve stejné změně (STR-001).
+- Balíčky jen z nuget.org (`nuget.config` v kořeni), verze jen v `Directory.Packages.props`.
+- Desktop v Debug buildu má data v `%LOCALAPPDATA%\Cruma\dev\` a v titulku „(dev)“ (PER-006).
 - Logování přes `ILogger` s NLog, výchozí úroveň Information; obsah poznámek, dotazy, tokeny a tajné údaje se
   nikdy nelogují (LOG-002).
 - Tajné údaje (Google OAuth, hesla databáze, klíče) nikdy do repozitáře (SEC-006).

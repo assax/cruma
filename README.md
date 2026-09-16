@@ -9,7 +9,7 @@ pokyny pro agenty: [AGENTS.md](AGENTS.md) · sprinty: [dev/SPRINTY.md](dev/SPRIN
 
 ## Stav
 
-Architektura je navržená, kód zatím neexistuje. Staví se inkrement **I-1 (walking skeleton)**: poznámky se
+Architektura je navržená, hotová je kostra řešení (etapa E-1). Staví se inkrement **I-1 (walking skeleton)**: poznámky se
 základním formátováním na desktopu i v PWA, server, přihlášení Googlem, synchronizace se slučováním
 a konflikty, vyhledávání, audit, zálohy a nasazení na Hetzner Cloud.
 
@@ -37,4 +37,7 @@ závazná pravidla [.architecture/architecture-cruma/PROFILE.md](.architecture/a
 | `docs/concept/` | podklady ke konceptu |
 | `.architecture/architecture-cruma/` | architecture profile – pravidla, patterny, policy |
 | `.aidevkit/` | pointer na profil pro AI-DevKit |
+| `src/`, `tests/` | produkční a testovací projekty (`Cruma.slnx`) |
+| `deploy/` | `compose.yaml` (profil `dev` = PostgreSQL pro vývoj) |
+| `.github/workflows/` | CI build a testy |
 | `dev/` | záznamy sprintů |

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cruma.Desktop.Storage\Cruma.Desktop.Storage.csproj" />
+  </ItemGroup>
+
+</Project>
