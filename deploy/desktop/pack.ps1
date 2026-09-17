@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Sestaví instalátor a aktualizační balíčky desktopu Cruma (T-53, desktop-pattern.md §6).
 

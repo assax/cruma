@@ -13,6 +13,18 @@ Architektura je navržená, hotová je kostra řešení (etapa E-1). Staví se i
 základním formátováním na desktopu i v PWA, server, přihlášení Googlem, synchronizace se slučováním
 a konflikty, vyhledávání, audit, zálohy a nasazení na Hetzner Cloud.
 
+## Spuštění pro vývoj
+
+Potřeba: .NET 10 SDK, Node.js, Podman. Ve dvou oknech PowerShellu:
+
+| Skript | Co dělá |
+|---|---|
+| `scripts/run-server.ps1` | Podman, vývojová databáze, heslo a připojení (poprvé), migrace, server na https://localhost:5001 |
+| `scripts/run-desktop.ps1` | desktop „Cruma (dev)“; `-Reset` smaže jeho vývojová data |
+| `scripts/stop-dev.ps1` | zastaví vývojovou databázi (data zůstanou) |
+
+Přihlášení bez Googlu: „Vývojové přihlášení“ s libovolným jménem (jen vývoj).
+
 ## Architektura
 
 | Vrstva | Projekty | Co dělá |
