@@ -14,7 +14,7 @@ namespace Cruma.Web.Data;
 /// a po obnovení spojení se odešle sama. Opakované odeslání téže položky nevytvoří druhou poznámku, protože server
 /// zná identifikátor poznámky od klienta.
 /// </summary>
-public sealed class WriteQueue(BrowserModule browser, CrumaApiClient api, BrowserConnectivity connectivity, TimeProvider time, ILogger<WriteQueue> logger)
+public sealed class WriteQueue(BrowserModule browser, CrumaApiClient api, BrowserConnectivity connectivity, IDataChanges dataChanges, TimeProvider time, ILogger<WriteQueue> logger)
     : IPendingNotes
 {
     private readonly SemaphoreSlim replayLock = new(1, 1);
@@ -27,18 +27,31 @@ public sealed class WriteQueue(BrowserModule browser, CrumaApiClient api, Browse
     public async Task StartAsync()
     {
         await RefreshAsync();
-        connectivity.Changed += () => _ = ReplayAsync();
+        connectivity.Changed += () =>
+        {
+            _ = ReplayAsync();
+            if (connectivity.IsOnline)
+            {
+                dataChanges.NotifyChanged();
+            }
+        };
         await ReplayAsync();
         _ = RetryPeriodicallyAsync();
     }
 
     // Server se může vrátit, aniž by prohlížeč hlásil změnu sítě – fronta se proto zkouší i pravidelně.
+    // Tenký klient zároveň pravidelně načte data znovu, aby viděl změny z jiných zařízení.
     private async Task RetryPeriodicallyAsync()
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15), time);
+        var tick = 0;
         while (await timer.WaitForNextTickAsync())
         {
             await ReplayAsync();
+            if (++tick % 2 == 0 && connectivity.IsOnline)
+            {
+                dataChanges.NotifyChanged();
+            }
         }
     }
 
@@ -79,6 +92,7 @@ public sealed class WriteQueue(BrowserModule browser, CrumaApiClient api, Browse
                 }
 
                 await (await browser.GetAsync()).InvokeVoidAsync("queueRemove", item.Id);
+                dataChanges.NotifyChanged();
             }
         }
         finally

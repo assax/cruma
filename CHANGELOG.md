@@ -22,6 +22,15 @@ verzování podle [SemVer](https://semver.org/lang/cs/).
 - **Poznámka i bez připojení.** Bez sítě jde napsat novou poznámku – počká ve frontě a po obnovení spojení se odešle
   sama; ostatní akce jsou do té doby vypnuté a aplikace ukazuje stav Offline.
 
+### Opraveno
+
+- **Nové a změněné poznámky se ukážou bez odchodu ze stránky.** Po synchronizaci desktopu (i po kliknutí na stav
+  synchronizace) a na webu do půl minuty se přehled, filtry i otevřená poznámka načtou znovu; dřív bylo nutné přejít
+  jinam a vrátit se. Otevřená poznámka s neuloženou úpravou se nepřepíše.
+- **Barva karty poznámky se projeví.** Zvolená barva byla uložená, ale styl karty ji přebil; nově je vidět v přehledu
+  i na detailu, ve světlém i tmavém režimu.
+- **Kliknutí na stav synchronizace dává odezvu.** Hned ukáže „Synchronizuji…“.
+
 ### Vývojářské
 
 - **Architektura a plán prvního inkrementu.** Koncept, architektura celého systému (`docs/arch/`), architecture

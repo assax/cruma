@@ -63,6 +63,24 @@ public interface IAppUpdates
     Task ApplyAsync(CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Oznámení, že se data změnila mimo aktuální stránku (synchronizace, jiné zařízení); seznamy a detail se znovu načtou.
+/// </summary>
+public interface IDataChanges
+{
+    event Action? Changed;
+
+    void NotifyChanged();
+}
+
+/// <summary>Výchozí implementace – jedna instance pro celou aplikaci.</summary>
+public sealed class DataChanges : IDataChanges
+{
+    public event Action? Changed;
+
+    public void NotifyChanged() => Changed?.Invoke();
+}
+
 /// <summary>Nové poznámky čekající na odeslání (FR-30 akc. 2).</summary>
 public interface IPendingNotes
 {

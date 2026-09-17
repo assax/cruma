@@ -14,7 +14,11 @@ public enum SyncState
 }
 
 /// <summary>Stav pro UI: stav, důvod, čas poslední úspěšné relace a nutnost aktualizace (FR-37).</summary>
-public sealed record SyncStatus(SyncState State, string? Detail, DateTimeOffset? LastSyncedAtUtc, bool UpdateRequired, bool Offline);
+public sealed record SyncStatus(SyncState State, string? Detail, DateTimeOffset? LastSyncedAtUtc, bool UpdateRequired, bool Offline)
+{
+    /// <summary>Počet změn, které relace odeslala nebo stáhla – UI podle něj znovu načte data.</summary>
+    public int AppliedChanges { get; init; }
+}
 
 /// <summary>
 /// Synchronizační engine desktopu (versioning-and-sync-pattern.md §5): handshake → push čekajících změn → pull
@@ -132,7 +136,10 @@ public sealed class SyncEngine(LocalNotesStore store, ISyncTransport transport, 
         }
 
         logger.LogInformation("Sync session finished: pushed {Pushed} changes, pulled {Pulled} entries, cursor {Cursor}", outgoing.Count, pulledEntries, cursor);
-        return await SummaryStatusAsync(offline: false, updateRequired: false, lastSynced: time.GetUtcNow(), cancellationToken);
+        return (await SummaryStatusAsync(offline: false, updateRequired: false, lastSynced: time.GetUtcNow(), cancellationToken)) with
+        {
+            AppliedChanges = outgoing.Count + pulledEntries,
+        };
     }
 
     private async Task<SyncStatus> FailureStatusAsync(TransportFailure failure, string? minimumVersion, CancellationToken cancellationToken)

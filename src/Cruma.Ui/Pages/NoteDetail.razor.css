@@ -6,6 +6,11 @@
     min-width: 0;
 }
 
+.note-detail.is-colored {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+}
+
 /* Šířka editoru (FR-8): desktop volí režim, tenký klient je responzivní. */
 .note-detail.width-standard { max-width: 46rem; }
 .note-detail.width-wide { max-width: 64rem; }

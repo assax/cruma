@@ -44,13 +44,19 @@ public sealed class DesktopSyncStatusView : ISyncStatusView
 {
     private readonly DesktopRuntime runtime;
 
-    public DesktopSyncStatusView(DesktopRuntime runtime)
+    public DesktopSyncStatusView(DesktopRuntime runtime, IDataChanges dataChanges)
     {
         this.runtime = runtime;
         runtime.SyncStatusChanged += status =>
         {
             Current = new SyncIndicator(status.State.ToString(), Label(status.State), status.Detail);
             Changed?.Invoke();
+
+            // Stažené nebo odeslané změny (i výsledky sloučení) se hned projeví v otevřených seznamech a detailu.
+            if (status.AppliedChanges > 0)
+            {
+                dataChanges.NotifyChanged();
+            }
         };
     }
 
@@ -58,7 +64,17 @@ public sealed class DesktopSyncStatusView : ISyncStatusView
 
     public event Action? Changed;
 
-    public void SyncNow() => runtime.Engine?.RequestSync(TimeSpan.Zero);
+    public void SyncNow()
+    {
+        if (runtime.Engine is null)
+        {
+            return;
+        }
+
+        Current = new SyncIndicator("Pending", "Synchronizuji…", null);
+        Changed?.Invoke();
+        runtime.Engine.RequestSync(TimeSpan.Zero);
+    }
 
     private static string Label(SyncState state) => state switch
     {

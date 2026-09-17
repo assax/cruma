@@ -1,5 +1,6 @@
 @* Náhled poznámky v přehledu: barva karty jako token tématu (UI-006), připnutí, konflikt. *@
-<article class="note-card @NoteColors.CssClass(Note.Metadata.Color)">
+@* Barva jako inline token – třída z globálního stylu by prohrála se scoped pozadím karty. *@
+<article class="note-card" style="@NoteColors.BackgroundStyle(Note.Metadata.Color)">
     <a class="note-link" href="@($"notes/{Note.Id}")">
         @if (Note.Metadata.IsPinned)
         {

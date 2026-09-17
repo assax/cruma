@@ -6,6 +6,7 @@
 @inject ICapabilities Capabilities
 @inject CrumaUiState Ui
 @inject NavigationManager Navigation
+@inject IDataChanges DataChanges
 
 @if (note is null)
 {
@@ -13,7 +14,8 @@
 }
 else
 {
-    <div class="note-detail width-@(Capabilities.EditorWidthModes ? Ui.EditorWidth : "responsive")">
+    <div class="note-detail width-@(Capabilities.EditorWidthModes ? Ui.EditorWidth : "responsive") @(color is null ? null : "is-colored")"
+         style="@NoteColors.BackgroundStyle(color)">
         <div class="toolbar-row">
             <a href="" class="back">← Zpět</a>
             <span class="status" role="status">@status</span>
@@ -49,7 +51,7 @@ else
             </div>
         }
 
-        <CrumaEditor Document="document" DocumentChanged="OnDocumentChanged" DocumentKey="@editorKey" ReadOnly="false" />
+        <CrumaEditor @ref="editor" Document="document" DocumentChanged="OnDocumentChanged" DocumentKey="@editorKey" ReadOnly="false" />
 
         <section class="properties" aria-label="Vlastnosti">
             <label>
@@ -127,6 +129,8 @@ else
     private string? error;
     private bool saving;
     private bool saveAgain;
+    private bool dirty;
+    private CrumaEditor? editor;
 
     [Parameter]
     public Guid Id { get; set; }
@@ -139,8 +143,35 @@ else
     protected override async Task OnInitializedAsync()
     {
         Connectivity.Changed += OnConnectivityChanged;
+        DataChanges.Changed += OnDataChanged;
         await Ui.LoadAsync();
     }
+
+    // Poznámka změněná jinde (synchronizace, jiné zařízení) se znovu načte – jen když tu není neuložená úprava.
+    private void OnDataChanged() => InvokeAsync(async () =>
+    {
+        if (editor is not null)
+        {
+            await editor.FlushAsync();
+        }
+
+        if (note is null || saving || dirty)
+        {
+            return;
+        }
+
+        var loaded = await Notes.GetAsync(Id);
+        if (!loaded.IsSuccess || saving || dirty)
+        {
+            return;
+        }
+
+        // Jen jiná verze se stejným obsahem (potvrzení vlastní úpravy) editor nepřenačítá – kurzor zůstane.
+        var contentChanged = !loaded.Value.Document.ContentEquals(document) || !loaded.Value.Metadata.Equals(note.Metadata)
+            || loaded.Value.HasConflict != note.HasConflict;
+        Apply(loaded.Value, reloadEditor: contentChanged);
+        StateHasChanged();
+    });
 
     // Stránka se znovu použije i při přechodu na jinou poznámku – data se načtou při každé změně Id.
     protected override async Task OnParametersSetAsync()
@@ -223,6 +254,7 @@ else
     // Uložení jdou za sebou – nikdy dvě souběžně ze stejné verze; změna během ukládání se uloží hned po něm.
     private void ScheduleSave()
     {
+        dirty = true;
         if (saving)
         {
             saveAgain = true;
@@ -235,6 +267,7 @@ else
 
     private async Task SaveLoopAsync()
     {
+        var failed = false;
         do
         {
             saveAgain = false;
@@ -247,6 +280,7 @@ else
             if (!result.IsSuccess)
             {
                 status = ErrorText.For(result.Error!);
+                failed = true;
                 break;
             }
 
@@ -279,6 +313,8 @@ else
         }
         while (saveAgain);
 
+        // Neúspěšné uložení nechá úpravu „neuloženou“, aby ji načtení odjinud nepřepsalo.
+        dirty = failed;
         saving = false;
         StateHasChanged();
     }
@@ -338,6 +374,7 @@ else
     public ValueTask DisposeAsync()
     {
         Connectivity.Changed -= OnConnectivityChanged;
+        DataChanges.Changed -= OnDataChanged;
         return ValueTask.CompletedTask;
     }
 }

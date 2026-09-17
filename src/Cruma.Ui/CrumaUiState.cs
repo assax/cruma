@@ -61,10 +61,15 @@ public static class NoteColors
     ];
 
     public static string? CssClass(string? color) => color is null ? null : $"cruma-card-color-{color}";
+
+    /// <summary>Pozadí karty přes token tématu (hodnota pro světlý i tmavý režim, UI-006).</summary>
+    public static string? BackgroundStyle(string? color) =>
+        color is not null && All.Any(entry => entry.Key == color) ? $"background: var(--cruma-card-{color});" : null;
 }
 
 /// <summary>Registrace sdíleného UI v kompozičním kořeni shellu.</summary>
 public static class CrumaUiServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrumaUi(this IServiceCollection services) => services.AddScoped<CrumaUiState>();
+    public static IServiceCollection AddCrumaUi(this IServiceCollection services) =>
+        services.AddScoped<CrumaUiState>().AddSingleton<IDataChanges, DataChanges>();
 }

@@ -3,6 +3,7 @@
 @inject INoteData Notes
 @inject ICatalogData Catalog
 @inject IPendingNotes Pending
+@inject IDataChanges DataChanges
 
 <h1 class="visually-hidden">Poznámky</h1>
 
@@ -54,6 +55,19 @@
     protected override async Task OnInitializedAsync()
     {
         Pending.Changed += OnPendingChanged;
+        DataChanges.Changed += OnDataChanged;
+        await LoadCatalogAsync();
+    }
+
+    // Kategorie a štítky z jiného zařízení se objeví ve filtrech bez přechodu na jinou stránku.
+    private void OnDataChanged() => InvokeAsync(async () =>
+    {
+        await LoadCatalogAsync();
+        StateHasChanged();
+    });
+
+    private async Task LoadCatalogAsync()
+    {
         var categoriesResult = await Catalog.ListCategoriesAsync();
         var tagsResult = await Catalog.ListTagsAsync();
         categories = categoriesResult.IsSuccess ? categoriesResult.Value : [];
@@ -85,5 +99,9 @@
         StateHasChanged();
     });
 
-    public void Dispose() => Pending.Changed -= OnPendingChanged;
+    public void Dispose()
+    {
+        Pending.Changed -= OnPendingChanged;
+        DataChanges.Changed -= OnDataChanged;
+    }
 }
